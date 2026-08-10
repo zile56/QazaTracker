@@ -1,0 +1,33 @@
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+/.idea/deploymentTargetSelector.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Build artifacts and profiling output
+*.apk
+*.aab
+*.ap_
+*.dex
+*.hprof
+
+# Signing material — never commit keystores
+*.jks
+*.keystore
+
+# Kotlin/Gradle local caches
+.kotlin/
+
+# Local project-instructions file — not published to the repo
+/CLAUDE.md
