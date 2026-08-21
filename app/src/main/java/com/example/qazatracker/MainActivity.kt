@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
-import com.example.qazatracker.ui.onboarding.OnboardingScreen
+import com.example.qazatracker.ui.navigation.QazaNavHost
 import com.example.qazatracker.ui.theme.QazaTrackerTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             QazaTrackerTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    OnboardingScreen(modifier = Modifier.padding(innerPadding))
+                    QazaNavHost(modifier = Modifier.padding(innerPadding))
                 }
             }
         }

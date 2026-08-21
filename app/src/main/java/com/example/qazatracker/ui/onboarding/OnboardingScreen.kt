@@ -36,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,7 +44,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,7 +51,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.qazatracker.domain.model.BaselineCalculation
 import com.example.qazatracker.domain.model.CalculationMethod
-import com.example.qazatracker.domain.model.PrayerType
 import com.example.qazatracker.ui.theme.QazaShapes
 import java.time.Instant
 import java.time.LocalDate
@@ -62,9 +61,15 @@ import java.util.Locale
 @Composable
 fun OnboardingScreen(
     modifier: Modifier = Modifier,
-    viewModel: OnboardingViewModel = hiltViewModel()
+    viewModel: OnboardingViewModel = hiltViewModel(),
+    onBaselineCalculated: (BaselineCalculation) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(uiState.result) {
+        uiState.result?.let(onBaselineCalculated)
+    }
+
     OnboardingContent(
         uiState = uiState,
         onSelectMethod = viewModel::selectMethod,
@@ -140,11 +145,6 @@ fun OnboardingContent(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error
                     )
-                }
-
-                uiState.result?.let { result ->
-                    Spacer(Modifier.height(20.dp))
-                    BaselineResultCard(result)
                 }
 
                 Spacer(Modifier.height(16.dp))
@@ -382,56 +382,3 @@ private fun AgeField(
     }
 }
 
-@Composable
-private fun BaselineResultCard(result: BaselineCalculation) {
-    val total = result.countsByPrayerType.values.sum()
-
-    Surface(
-        shape = QazaShapes.cardShape,
-        color = MaterialTheme.colorScheme.secondaryContainer,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = "Estimated total",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSecondaryContainer
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                text = "$total prayers across ${result.missedDays} days",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSecondaryContainer
-            )
-            Spacer(Modifier.height(12.dp))
-            result.countsByPrayerType.forEach { (type, count) ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 3.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = type.displayName(),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                    Text(
-                        text = count.toString(),
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
-                    )
-                }
-            }
-        }
-    }
-}
-
-private fun PrayerType.displayName(): String = when (this) {
-    PrayerType.FAJR -> "Fajr"
-    PrayerType.DHUHR -> "Dhuhr"
-    PrayerType.ASR -> "Asr"
-    PrayerType.MAGHRIB -> "Maghrib"
-    PrayerType.ISHA -> "Isha"
-}

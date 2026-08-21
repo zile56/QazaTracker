@@ -5,9 +5,7 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import com.example.qazatracker.domain.model.BaselineCalculation
 import com.example.qazatracker.domain.model.CalculationMethod
-import com.example.qazatracker.domain.model.PrayerType
 import com.example.qazatracker.ui.theme.QazaTrackerTheme
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -100,25 +98,5 @@ class OnboardingScreenTest {
         composeTestRule.onNodeWithText("Continue").performClick()
 
         assertTrue(clicked)
-    }
-
-    @Test
-    fun calculatedResult_isShownOnScreen() {
-        val result = BaselineCalculation(
-            missedDays = 100,
-            countsByPrayerType = PrayerType.entries.associateWith { 100 },
-            method = CalculationMethod.AGE_ESTIMATE
-        )
-        setContent(
-            uiState = OnboardingUiState(
-                method = CalculationMethod.AGE_ESTIMATE,
-                ageNowInput = "30",
-                ageObligatoryInput = "12",
-                result = result
-            )
-        )
-
-        composeTestRule.onNodeWithText("Estimated total").assertExists()
-        composeTestRule.onNodeWithText("500 prayers across 100 days").assertExists()
     }
 }
