@@ -1,7 +1,6 @@
 package com.example.qazatracker.ui.baseline
 
 import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -74,13 +73,6 @@ class BaselineSummaryScreenTest {
         composeTestRule.onNodeWithText("Start tracking").performClick()
 
         assertTrue(confirmed)
-    }
-
-    @Test
-    fun afterConfirmation_buttonShowsSavedAndIsDisabled() {
-        setContent(uiState = defaultState().copy(isConfirmed = true))
-
-        composeTestRule.onNodeWithText("Saved").assertIsNotEnabled()
     }
 
     @Test

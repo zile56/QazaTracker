@@ -31,4 +31,10 @@ interface QazaRepository {
     fun observeRemainingCounts(): Flow<List<RemainingPrayerCount>>
 
     fun observeRemainingCount(prayerType: PrayerType): Flow<RemainingPrayerCount?>
+
+    /** True once at least one prayer type has a confirmed baseline. */
+    fun observeHasBaseline(): Flow<Boolean>
+
+    /** The moment the baseline was confirmed (all five rows share one timestamp), or null if unset. */
+    fun observeBaselineStartedAt(): Flow<Instant?>
 }

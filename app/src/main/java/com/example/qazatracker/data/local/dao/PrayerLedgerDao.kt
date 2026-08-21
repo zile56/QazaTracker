@@ -14,7 +14,8 @@ interface PrayerLedgerDao {
     @Query(
         """
         SELECT b.prayerType AS prayerType,
-               b.initialCount + COALESCE(adj.totalDelta, 0) - COALESCE(comp.completedCount, 0) AS remaining
+               b.initialCount + COALESCE(adj.totalDelta, 0) - COALESCE(comp.completedCount, 0) AS remaining,
+               COALESCE(comp.completedCount, 0) AS completed
         FROM BaselineSnapshot b
         LEFT JOIN (
             SELECT prayerType, SUM(delta) AS totalDelta
@@ -33,7 +34,8 @@ interface PrayerLedgerDao {
     @Query(
         """
         SELECT b.prayerType AS prayerType,
-               b.initialCount + COALESCE(adj.totalDelta, 0) - COALESCE(comp.completedCount, 0) AS remaining
+               b.initialCount + COALESCE(adj.totalDelta, 0) - COALESCE(comp.completedCount, 0) AS remaining,
+               COALESCE(comp.completedCount, 0) AS completed
         FROM BaselineSnapshot b
         LEFT JOIN (
             SELECT prayerType, SUM(delta) AS totalDelta
@@ -55,5 +57,6 @@ interface PrayerLedgerDao {
 
 data class RemainingCount(
     val prayerType: PrayerType,
-    val remaining: Int
+    val remaining: Int,
+    val completed: Int
 )

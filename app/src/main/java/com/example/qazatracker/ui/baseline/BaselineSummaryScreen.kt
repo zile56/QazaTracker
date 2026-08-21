@@ -29,6 +29,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,9 +48,15 @@ import com.example.qazatracker.ui.theme.QazaShapes
 fun BaselineSummaryScreen(
     modifier: Modifier = Modifier,
     viewModel: BaselineSummaryViewModel = hiltViewModel(),
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onBaselineConfirmed: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(uiState.isConfirmed) {
+        if (uiState.isConfirmed) onBaselineConfirmed()
+    }
+
     BaselineSummaryContent(
         uiState = uiState,
         onBack = onBack,
@@ -136,22 +143,12 @@ fun BaselineSummaryContent(
                     Text(text = uiState.total.toString(), style = MaterialTheme.typography.titleLarge)
                 }
 
-                if (uiState.isConfirmed) {
-                    Spacer(Modifier.height(16.dp))
-                    Text(
-                        text = "Baseline saved.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-                }
-
                 Spacer(Modifier.height(16.dp))
             }
 
             Column(modifier = Modifier.padding(horizontal = 22.dp, vertical = 16.dp)) {
                 Button(
                     onClick = onConfirmClicked,
-                    enabled = !uiState.isConfirmed,
                     shape = QazaShapes.pillShape,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
@@ -161,14 +158,9 @@ fun BaselineSummaryContent(
                         .fillMaxWidth()
                         .height(48.dp)
                 ) {
-                    Text(
-                        text = if (uiState.isConfirmed) "Saved" else "Start tracking",
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                    if (!uiState.isConfirmed) {
-                        Spacer(Modifier.width(6.dp))
-                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, modifier = Modifier.size(16.dp))
-                    }
+                    Text(text = "Start tracking", style = MaterialTheme.typography.labelLarge)
+                    Spacer(Modifier.width(6.dp))
+                    Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = null, modifier = Modifier.size(16.dp))
                 }
             }
         }

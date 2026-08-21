@@ -69,13 +69,19 @@ class QazaRepositoryImpl @Inject constructor(
 
     override fun observeRemainingCounts(): Flow<List<RemainingPrayerCount>> =
         prayerLedgerDao.observeRemainingCounts().map { rows ->
-            rows.map { RemainingPrayerCount(it.prayerType, it.remaining) }
+            rows.map { RemainingPrayerCount(it.prayerType, it.remaining, it.completed) }
         }
 
     override fun observeRemainingCount(prayerType: PrayerType): Flow<RemainingPrayerCount?> =
         prayerLedgerDao.observeRemainingCount(prayerType).map {
-            it?.let { row -> RemainingPrayerCount(row.prayerType, row.remaining) }
+            it?.let { row -> RemainingPrayerCount(row.prayerType, row.remaining, row.completed) }
         }
+
+    override fun observeHasBaseline(): Flow<Boolean> =
+        baselineSnapshotDao.observeAll().map { it.isNotEmpty() }
+
+    override fun observeBaselineStartedAt(): Flow<Instant?> =
+        baselineSnapshotDao.observeAll().map { snapshots -> snapshots.minOfOrNull { it.calculatedAt } }
 
     private fun CompletionEntry.toEntity() =
         CompletionLog(prayerType = prayerType, timestamp = timestamp, batchId = batchId)
