@@ -11,17 +11,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.qazatracker.domain.model.CompletionProjection
+import com.example.qazatracker.domain.model.PrayerType
 import com.example.qazatracker.ui.common.displayName
 import com.example.qazatracker.ui.theme.QazaShapes
 import kotlin.math.roundToInt
@@ -43,14 +48,25 @@ import kotlin.math.roundToInt
 @Composable
 fun DashboardScreen(
     modifier: Modifier = Modifier,
-    viewModel: DashboardViewModel = hiltViewModel()
+    viewModel: DashboardViewModel = hiltViewModel(),
+    onLogBatchClicked: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    DashboardContent(uiState = uiState, modifier = modifier)
+    DashboardContent(
+        uiState = uiState,
+        onQuickLog = viewModel::onQuickLog,
+        onLogBatchClicked = onLogBatchClicked,
+        modifier = modifier
+    )
 }
 
 @Composable
-fun DashboardContent(uiState: DashboardUiState, modifier: Modifier = Modifier) {
+fun DashboardContent(
+    uiState: DashboardUiState,
+    onQuickLog: (PrayerType) -> Unit = {},
+    onLogBatchClicked: () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(
             modifier = Modifier
@@ -83,6 +99,12 @@ fun DashboardContent(uiState: DashboardUiState, modifier: Modifier = Modifier) {
                 )
                 Spacer(Modifier.height(14.dp))
                 ProjectionBadge(uiState.projection)
+                Spacer(Modifier.height(14.dp))
+                OutlinedButton(onClick = onLogBatchClicked, shape = QazaShapes.pillShape) {
+                    Icon(Icons.Default.DateRange, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Log multiple days")
+                }
             }
 
             Spacer(Modifier.height(20.dp))
@@ -103,7 +125,8 @@ fun DashboardContent(uiState: DashboardUiState, modifier: Modifier = Modifier) {
                             MaterialTheme.colorScheme.onPrimaryContainer
                         } else {
                             MaterialTheme.colorScheme.onSecondaryContainer
-                        }
+                        },
+                        onQuickLog = { onQuickLog(row.prayerType) }
                     )
                 }
             }
@@ -142,7 +165,8 @@ private fun ProjectionBadge(projection: CompletionProjection) {
 private fun PrayerProgressRow(
     row: PrayerRowUiState,
     tintContainer: Color,
-    tintContent: Color
+    tintContent: Color,
+    onQuickLog: () -> Unit
 ) {
     Surface(
         shape = QazaShapes.cardShape,
@@ -150,25 +174,44 @@ private fun PrayerProgressRow(
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                Box(
-                    modifier = Modifier
-                        .size(30.dp)
-                        .background(tintContainer, CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = row.prayerType.displayName().take(1),
-                        style = MaterialTheme.typography.titleSmall,
-                        color = tintContent
-                    )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Box(
+                        modifier = Modifier
+                            .size(30.dp)
+                            .background(tintContainer, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = row.prayerType.displayName().take(1),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = tintContent
+                        )
+                    }
+                    Column {
+                        Text(text = row.prayerType.displayName(), style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            text = "${row.remaining} left · ${row.completed} done",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
-                Column {
-                    Text(text = row.prayerType.displayName(), style = MaterialTheme.typography.bodyLarge)
-                    Text(
-                        text = "${row.remaining} left · ${row.completed} done",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                IconButton(
+                    onClick = onQuickLog,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(MaterialTheme.colorScheme.primary, CircleShape)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Log one ${row.prayerType.displayName()}",
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }

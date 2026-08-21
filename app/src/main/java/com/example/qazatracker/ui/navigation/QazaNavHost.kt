@@ -15,6 +15,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.qazatracker.ui.baseline.BaselineSummaryScreen
+import com.example.qazatracker.ui.batch.BatchLoggingScreen
 import com.example.qazatracker.ui.dashboard.DashboardScreen
 import com.example.qazatracker.ui.onboarding.OnboardingScreen
 
@@ -67,7 +68,14 @@ fun QazaNavHost(modifier: Modifier = Modifier, appViewModel: AppViewModel = hilt
         }
 
         composable(Routes.DASHBOARD) {
-            DashboardScreen()
+            DashboardScreen(onLogBatchClicked = { navController.navigate(Routes.BATCH_LOGGING) })
+        }
+
+        composable(Routes.BATCH_LOGGING) {
+            BatchLoggingScreen(
+                onBack = { navController.popBackStack() },
+                onLogged = { navController.popBackStack() }
+            )
         }
     }
 }

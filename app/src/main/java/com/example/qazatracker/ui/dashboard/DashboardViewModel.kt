@@ -6,6 +6,7 @@ import com.example.qazatracker.domain.model.CompletionProjection
 import com.example.qazatracker.domain.model.PrayerType
 import com.example.qazatracker.domain.model.RemainingPrayerCount
 import com.example.qazatracker.domain.repository.QazaRepository
+import com.example.qazatracker.domain.usecase.LogCompletionUseCase
 import com.example.qazatracker.domain.usecase.ProjectCompletionDateUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
@@ -20,11 +21,21 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     repository: QazaRepository,
-    private val projectCompletionDate: ProjectCompletionDateUseCase
+    private val projectCompletionDate: ProjectCompletionDateUseCase,
+    private val logCompletion: LogCompletionUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DashboardUiState())
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
+
+    /**
+     * Quick single-tap log for one prayer type. The dashboard doesn't refetch after this —
+     * Room's Flow invalidation re-emits observeRemainingCounts() on its own, so uiState
+     * updates the same way it does for any other write to the ledger tables.
+     */
+    fun onQuickLog(prayerType: PrayerType) {
+        viewModelScope.launch { logCompletion(prayerType) }
+    }
 
     init {
         viewModelScope.launch {

@@ -1,11 +1,14 @@
 package com.example.qazatracker.ui.dashboard
 
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import com.example.qazatracker.domain.model.CompletionProjection
 import com.example.qazatracker.domain.model.PrayerType
 import com.example.qazatracker.ui.theme.QazaTrackerTheme
 import java.time.LocalDate
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -17,10 +20,14 @@ class DashboardScreenTest {
     private fun rows(completedEach: Int, remainingEach: Int) =
         PrayerType.entries.map { PrayerRowUiState(it, completed = completedEach, remaining = remainingEach) }
 
-    private fun setContent(uiState: DashboardUiState) {
+    private fun setContent(
+        uiState: DashboardUiState,
+        onQuickLog: (PrayerType) -> Unit = {},
+        onLogBatchClicked: () -> Unit = {}
+    ) {
         composeTestRule.setContent {
             QazaTrackerTheme {
-                DashboardContent(uiState = uiState)
+                DashboardContent(uiState = uiState, onQuickLog = onQuickLog, onLogBatchClicked = onLogBatchClicked)
             }
         }
     }
@@ -119,5 +126,39 @@ class DashboardScreenTest {
         )
 
         composeTestRule.onNodeWithText("At your pace, cleared in ~1 month").assertExists()
+    }
+
+    // ---- Quick single-tap log and batch entry point ----
+
+    @Test
+    fun tappingQuickLog_invokesCallbackWithCorrectPrayerType() {
+        var logged: PrayerType? = null
+        setContent(
+            uiState = DashboardUiState(
+                rows = rows(completedEach = 0, remainingEach = 10),
+                projection = CompletionProjection.InsufficientData
+            ),
+            onQuickLog = { logged = it }
+        )
+
+        composeTestRule.onNodeWithContentDescription("Log one Asr").performClick()
+
+        assertTrue(logged == PrayerType.ASR)
+    }
+
+    @Test
+    fun tappingLogMultipleDays_invokesCallback() {
+        var clicked = false
+        setContent(
+            uiState = DashboardUiState(
+                rows = rows(completedEach = 0, remainingEach = 10),
+                projection = CompletionProjection.InsufficientData
+            ),
+            onLogBatchClicked = { clicked = true }
+        )
+
+        composeTestRule.onNodeWithText("Log multiple days").performClick()
+
+        assertTrue(clicked)
     }
 }

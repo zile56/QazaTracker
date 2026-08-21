@@ -5,6 +5,7 @@ import com.example.qazatracker.domain.model.CalculationMethod
 object Routes {
     const val ONBOARDING = "onboarding"
     const val DASHBOARD = "dashboard"
+    const val BATCH_LOGGING = "batchLogging"
 
     const val MISSED_DAYS_ARG = "missedDays"
     const val METHOD_ARG = "method"
