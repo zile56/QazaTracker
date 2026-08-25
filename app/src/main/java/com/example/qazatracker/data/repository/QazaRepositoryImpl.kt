@@ -7,6 +7,7 @@ import com.example.qazatracker.data.local.dao.PrayerLedgerDao
 import com.example.qazatracker.data.local.entity.AdjustmentLog
 import com.example.qazatracker.data.local.entity.BaselineSnapshot
 import com.example.qazatracker.data.local.entity.CompletionLog
+import com.example.qazatracker.domain.model.AdjustmentEntry
 import com.example.qazatracker.domain.model.AdjustmentReason
 import com.example.qazatracker.domain.model.CalculationMethod
 import com.example.qazatracker.domain.model.CompletionEntry
@@ -82,6 +83,16 @@ class QazaRepositoryImpl @Inject constructor(
 
     override fun observeBaselineStartedAt(): Flow<Instant?> =
         baselineSnapshotDao.observeAll().map { snapshots -> snapshots.minOfOrNull { it.calculatedAt } }
+
+    override fun observeCompletionLogs(): Flow<List<CompletionEntry>> =
+        completionLogDao.observeAll().map { rows ->
+            rows.map { CompletionEntry(it.prayerType, it.timestamp, it.batchId) }
+        }
+
+    override fun observeAdjustments(): Flow<List<AdjustmentEntry>> =
+        adjustmentLogDao.observeAll().map { rows ->
+            rows.map { AdjustmentEntry(it.prayerType, it.delta, it.reason, it.note, it.timestamp) }
+        }
 
     private fun CompletionEntry.toEntity() =
         CompletionLog(prayerType = prayerType, timestamp = timestamp, batchId = batchId)

@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DateRange
@@ -49,13 +50,15 @@ import kotlin.math.roundToInt
 fun DashboardScreen(
     modifier: Modifier = Modifier,
     viewModel: DashboardViewModel = hiltViewModel(),
-    onLogBatchClicked: () -> Unit = {}
+    onLogBatchClicked: () -> Unit = {},
+    onHistoryClicked: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     DashboardContent(
         uiState = uiState,
         onQuickLog = viewModel::onQuickLog,
         onLogBatchClicked = onLogBatchClicked,
+        onHistoryClicked = onHistoryClicked,
         modifier = modifier
     )
 }
@@ -65,6 +68,7 @@ fun DashboardContent(
     uiState: DashboardUiState,
     onQuickLog: (PrayerType) -> Unit = {},
     onLogBatchClicked: () -> Unit = {},
+    onHistoryClicked: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -75,11 +79,25 @@ fun DashboardContent(
                 .padding(horizontal = 22.dp)
                 .padding(top = 8.dp, bottom = 28.dp)
         ) {
-            Text(
-                text = "QAZA TRACKER",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.primary
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "QAZA TRACKER",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                IconButton(onClick = onHistoryClicked, modifier = Modifier.size(36.dp)) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.List,
+                        contentDescription = "History",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
 
             Spacer(Modifier.height(18.dp))
 

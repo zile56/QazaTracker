@@ -1,5 +1,6 @@
 package com.example.qazatracker.domain.repository
 
+import com.example.qazatracker.domain.model.AdjustmentEntry
 import com.example.qazatracker.domain.model.AdjustmentReason
 import com.example.qazatracker.domain.model.CalculationMethod
 import com.example.qazatracker.domain.model.CompletionEntry
@@ -37,4 +38,10 @@ interface QazaRepository {
 
     /** The moment the baseline was confirmed (all five rows share one timestamp), or null if unset. */
     fun observeBaselineStartedAt(): Flow<Instant?>
+
+    /** Raw completion log rows, most recent first — grouping/collapsing is a domain concern. */
+    fun observeCompletionLogs(): Flow<List<CompletionEntry>>
+
+    /** Raw adjustment log rows, most recent first. */
+    fun observeAdjustments(): Flow<List<AdjustmentEntry>>
 }

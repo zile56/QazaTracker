@@ -23,11 +23,17 @@ class DashboardScreenTest {
     private fun setContent(
         uiState: DashboardUiState,
         onQuickLog: (PrayerType) -> Unit = {},
-        onLogBatchClicked: () -> Unit = {}
+        onLogBatchClicked: () -> Unit = {},
+        onHistoryClicked: () -> Unit = {}
     ) {
         composeTestRule.setContent {
             QazaTrackerTheme {
-                DashboardContent(uiState = uiState, onQuickLog = onQuickLog, onLogBatchClicked = onLogBatchClicked)
+                DashboardContent(
+                    uiState = uiState,
+                    onQuickLog = onQuickLog,
+                    onLogBatchClicked = onLogBatchClicked,
+                    onHistoryClicked = onHistoryClicked
+                )
             }
         }
     }
@@ -158,6 +164,22 @@ class DashboardScreenTest {
         )
 
         composeTestRule.onNodeWithText("Log multiple days").performClick()
+
+        assertTrue(clicked)
+    }
+
+    @Test
+    fun tappingHistoryIcon_invokesCallback() {
+        var clicked = false
+        setContent(
+            uiState = DashboardUiState(
+                rows = rows(completedEach = 0, remainingEach = 10),
+                projection = CompletionProjection.InsufficientData
+            ),
+            onHistoryClicked = { clicked = true }
+        )
+
+        composeTestRule.onNodeWithContentDescription("History").performClick()
 
         assertTrue(clicked)
     }
