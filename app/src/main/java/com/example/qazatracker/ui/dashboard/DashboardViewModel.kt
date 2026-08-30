@@ -2,10 +2,12 @@ package com.example.qazatracker.ui.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.qazatracker.domain.model.AdjustmentReason
 import com.example.qazatracker.domain.model.CompletionProjection
 import com.example.qazatracker.domain.model.PrayerType
 import com.example.qazatracker.domain.model.RemainingPrayerCount
 import com.example.qazatracker.domain.repository.QazaRepository
+import com.example.qazatracker.domain.usecase.ApplyAdjustmentUseCase
 import com.example.qazatracker.domain.usecase.LogCompletionUseCase
 import com.example.qazatracker.domain.usecase.ProjectCompletionDateUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,13 +18,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     repository: QazaRepository,
     private val projectCompletionDate: ProjectCompletionDateUseCase,
-    private val logCompletion: LogCompletionUseCase
+    private val logCompletion: LogCompletionUseCase,
+    private val applyAdjustment: ApplyAdjustmentUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DashboardUiState())
@@ -37,6 +41,44 @@ class DashboardViewModel @Inject constructor(
         viewModelScope.launch { logCompletion(prayerType) }
     }
 
+    fun onAdjustClicked(prayerType: PrayerType) {
+        _uiState.update { it.copy(adjustmentDialog = AdjustmentDialogState(prayerType)) }
+    }
+
+    fun onDismissAdjustmentDialog() {
+        _uiState.update { it.copy(adjustmentDialog = null) }
+    }
+
+    fun onAdjustmentSignChanged(isNegative: Boolean) {
+        _uiState.update { it.copy(adjustmentDialog = it.adjustmentDialog?.copy(isNegative = isNegative)) }
+    }
+
+    fun onAdjustmentMagnitudeChanged(value: String) {
+        if (value.length <= 4 && value.all(Char::isDigit)) {
+            _uiState.update { it.copy(adjustmentDialog = it.adjustmentDialog?.copy(magnitudeInput = value)) }
+        }
+    }
+
+    fun onAdjustmentNoteChanged(value: String) {
+        _uiState.update { it.copy(adjustmentDialog = it.adjustmentDialog?.copy(note = value)) }
+    }
+
+    fun onConfirmAdjustment() {
+        val dialog = _uiState.value.adjustmentDialog ?: return
+        val delta = dialog.delta
+        if (delta == null || delta == 0) return
+
+        viewModelScope.launch {
+            applyAdjustment(
+                dialog.prayerType,
+                delta,
+                AdjustmentReason.MANUAL_CORRECTION,
+                dialog.note.ifBlank { null }
+            )
+            _uiState.update { it.copy(adjustmentDialog = null) }
+        }
+    }
+
     init {
         viewModelScope.launch {
             combine(
@@ -44,7 +86,10 @@ class DashboardViewModel @Inject constructor(
                 repository.observeBaselineStartedAt()
             ) { counts, startedAt -> counts to startedAt }
                 .collect { (counts, startedAt) ->
-                    _uiState.value = buildUiState(counts, startedAt)
+                    val computed = buildUiState(counts, startedAt)
+                    // Only replace the repository-derived fields — a re-emission (e.g. from
+                    // another screen's write) must not clobber an in-progress dialog.
+                    _uiState.update { it.copy(rows = computed.rows, projection = computed.projection) }
                 }
         }
     }

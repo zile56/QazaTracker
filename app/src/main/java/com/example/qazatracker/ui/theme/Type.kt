@@ -2,15 +2,21 @@ package com.example.qazatracker.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.example.qazatracker.R
 
 // Design import specifies Caprasimo (headings) + Figtree (body) via Google Fonts.
-// No font files are bundled yet, so both fall back to the platform default —
-// swap these for real FontFamily resources once the .ttf assets are added.
-val HeadingFontFamily = FontFamily.Default
-val BodyFontFamily = FontFamily.Default
+// Caprasimo only ships one static weight (400/Regular). Figtree ships only as a
+// variable font, so its 400/700 weights are pulled from res/font/figtree.xml,
+// a font-family resource that references the single variable TTF twice.
+val HeadingFontFamily = FontFamily(Font(R.font.caprasimo_regular, FontWeight.Normal))
+val BodyFontFamily = FontFamily(
+    Font(R.font.figtree, FontWeight.Normal),
+    Font(R.font.figtree, FontWeight.Bold)
+)
 
 // Base type scale from the design import (styles.css h1..h6, body).
 val Typography = Typography(

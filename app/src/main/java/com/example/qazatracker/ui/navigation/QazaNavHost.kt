@@ -19,6 +19,7 @@ import com.example.qazatracker.ui.batch.BatchLoggingScreen
 import com.example.qazatracker.ui.dashboard.DashboardScreen
 import com.example.qazatracker.ui.history.HistoryScreen
 import com.example.qazatracker.ui.onboarding.OnboardingScreen
+import com.example.qazatracker.ui.settings.SettingsScreen
 
 /**
  * Onboarding and baseline summary are first-run-only: once a baseline exists, the graph
@@ -71,7 +72,8 @@ fun QazaNavHost(modifier: Modifier = Modifier, appViewModel: AppViewModel = hilt
         composable(Routes.DASHBOARD) {
             DashboardScreen(
                 onLogBatchClicked = { navController.navigate(Routes.BATCH_LOGGING) },
-                onHistoryClicked = { navController.navigate(Routes.HISTORY) }
+                onHistoryClicked = { navController.navigate(Routes.HISTORY) },
+                onSettingsClicked = { navController.navigate(Routes.SETTINGS) }
             )
         }
 
@@ -84,6 +86,10 @@ fun QazaNavHost(modifier: Modifier = Modifier, appViewModel: AppViewModel = hilt
 
         composable(Routes.HISTORY) {
             HistoryScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable(Routes.SETTINGS) {
+            SettingsScreen(onBack = { navController.popBackStack() })
         }
     }
 }

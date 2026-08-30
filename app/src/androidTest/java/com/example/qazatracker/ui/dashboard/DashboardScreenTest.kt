@@ -1,5 +1,7 @@
 package com.example.qazatracker.ui.dashboard
 
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -24,7 +26,14 @@ class DashboardScreenTest {
         uiState: DashboardUiState,
         onQuickLog: (PrayerType) -> Unit = {},
         onLogBatchClicked: () -> Unit = {},
-        onHistoryClicked: () -> Unit = {}
+        onHistoryClicked: () -> Unit = {},
+        onSettingsClicked: () -> Unit = {},
+        onAdjustClicked: (PrayerType) -> Unit = {},
+        onAdjustmentSignChanged: (Boolean) -> Unit = {},
+        onAdjustmentMagnitudeChanged: (String) -> Unit = {},
+        onAdjustmentNoteChanged: (String) -> Unit = {},
+        onConfirmAdjustment: () -> Unit = {},
+        onDismissAdjustmentDialog: () -> Unit = {}
     ) {
         composeTestRule.setContent {
             QazaTrackerTheme {
@@ -32,7 +41,14 @@ class DashboardScreenTest {
                     uiState = uiState,
                     onQuickLog = onQuickLog,
                     onLogBatchClicked = onLogBatchClicked,
-                    onHistoryClicked = onHistoryClicked
+                    onHistoryClicked = onHistoryClicked,
+                    onSettingsClicked = onSettingsClicked,
+                    onAdjustClicked = onAdjustClicked,
+                    onAdjustmentSignChanged = onAdjustmentSignChanged,
+                    onAdjustmentMagnitudeChanged = onAdjustmentMagnitudeChanged,
+                    onAdjustmentNoteChanged = onAdjustmentNoteChanged,
+                    onConfirmAdjustment = onConfirmAdjustment,
+                    onDismissAdjustmentDialog = onDismissAdjustmentDialog
                 )
             }
         }
@@ -182,5 +198,122 @@ class DashboardScreenTest {
         composeTestRule.onNodeWithContentDescription("History").performClick()
 
         assertTrue(clicked)
+    }
+
+    @Test
+    fun tappingSettingsIcon_invokesCallback() {
+        var clicked = false
+        setContent(
+            uiState = DashboardUiState(
+                rows = rows(completedEach = 0, remainingEach = 10),
+                projection = CompletionProjection.InsufficientData
+            ),
+            onSettingsClicked = { clicked = true }
+        )
+
+        composeTestRule.onNodeWithContentDescription("Settings").performClick()
+
+        assertTrue(clicked)
+    }
+
+    // ---- Manual adjustment entry point and dialog validation ----
+
+    @Test
+    fun tappingAdjustIcon_invokesCallbackWithCorrectPrayerType() {
+        var adjusted: PrayerType? = null
+        setContent(
+            uiState = DashboardUiState(rows = rows(completedEach = 0, remainingEach = 10)),
+            onAdjustClicked = { adjusted = it }
+        )
+
+        composeTestRule.onNodeWithContentDescription("Adjust Fajr").performClick()
+
+        assertTrue(adjusted == PrayerType.FAJR)
+    }
+
+    @Test
+    fun adjustmentDialog_saveIsDisabled_whenMagnitudeIsEmpty() {
+        setContent(
+            uiState = DashboardUiState(
+                rows = rows(completedEach = 0, remainingEach = 10),
+                adjustmentDialog = AdjustmentDialogState(PrayerType.FAJR)
+            )
+        )
+
+        composeTestRule.onNodeWithText("Save").assertIsNotEnabled()
+    }
+
+    @Test
+    fun adjustmentDialog_saveIsDisabled_whenDeltaIsZero() {
+        // Zero magnitude means delta == 0 regardless of sign, matching
+        // ApplyAdjustmentUseCase's own require(delta != 0).
+        setContent(
+            uiState = DashboardUiState(
+                rows = rows(completedEach = 0, remainingEach = 10),
+                adjustmentDialog = AdjustmentDialogState(PrayerType.FAJR, magnitudeInput = "0")
+            )
+        )
+
+        composeTestRule.onNodeWithText("Save").assertIsNotEnabled()
+    }
+
+    @Test
+    fun adjustmentDialog_saveIsEnabled_withNonZeroMagnitude() {
+        setContent(
+            uiState = DashboardUiState(
+                rows = rows(completedEach = 0, remainingEach = 10),
+                adjustmentDialog = AdjustmentDialogState(PrayerType.FAJR, magnitudeInput = "5")
+            )
+        )
+
+        composeTestRule.onNodeWithText("Save").assertIsEnabled()
+    }
+
+    @Test
+    fun adjustmentDialog_clickingSave_invokesConfirmCallback() {
+        var confirmed = false
+        setContent(
+            uiState = DashboardUiState(
+                rows = rows(completedEach = 0, remainingEach = 10),
+                adjustmentDialog = AdjustmentDialogState(PrayerType.FAJR, magnitudeInput = "5")
+            ),
+            onConfirmAdjustment = { confirmed = true }
+        )
+
+        composeTestRule.onNodeWithText("Save").performClick()
+
+        assertTrue(confirmed)
+    }
+
+    @Test
+    fun adjustmentDialog_clickingCancel_invokesDismissCallback() {
+        var dismissed = false
+        setContent(
+            uiState = DashboardUiState(
+                rows = rows(completedEach = 0, remainingEach = 10),
+                adjustmentDialog = AdjustmentDialogState(PrayerType.FAJR, magnitudeInput = "5")
+            ),
+            onDismissAdjustmentDialog = { dismissed = true }
+        )
+
+        composeTestRule.onNodeWithText("Cancel").performClick()
+
+        assertTrue(dismissed)
+    }
+
+    @Test
+    fun adjustmentDialog_togglingSign_invokesCallbackWithNegativeTrue() {
+        var negative: Boolean? = null
+        setContent(
+            uiState = DashboardUiState(
+                rows = rows(completedEach = 0, remainingEach = 10),
+                adjustmentDialog = AdjustmentDialogState(PrayerType.FAJR, magnitudeInput = "5")
+            ),
+            onAdjustmentSignChanged = { negative = it }
+        )
+
+        composeTestRule.onNodeWithText("−").performClick()
+
+        assertTrue(negative == true)
     }
 }

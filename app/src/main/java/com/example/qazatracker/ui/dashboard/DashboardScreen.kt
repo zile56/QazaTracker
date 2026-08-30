@@ -15,20 +15,27 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -36,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -51,7 +59,8 @@ fun DashboardScreen(
     modifier: Modifier = Modifier,
     viewModel: DashboardViewModel = hiltViewModel(),
     onLogBatchClicked: () -> Unit = {},
-    onHistoryClicked: () -> Unit = {}
+    onHistoryClicked: () -> Unit = {},
+    onSettingsClicked: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     DashboardContent(
@@ -59,6 +68,13 @@ fun DashboardScreen(
         onQuickLog = viewModel::onQuickLog,
         onLogBatchClicked = onLogBatchClicked,
         onHistoryClicked = onHistoryClicked,
+        onSettingsClicked = onSettingsClicked,
+        onAdjustClicked = viewModel::onAdjustClicked,
+        onAdjustmentSignChanged = viewModel::onAdjustmentSignChanged,
+        onAdjustmentMagnitudeChanged = viewModel::onAdjustmentMagnitudeChanged,
+        onAdjustmentNoteChanged = viewModel::onAdjustmentNoteChanged,
+        onConfirmAdjustment = viewModel::onConfirmAdjustment,
+        onDismissAdjustmentDialog = viewModel::onDismissAdjustmentDialog,
         modifier = modifier
     )
 }
@@ -69,6 +85,13 @@ fun DashboardContent(
     onQuickLog: (PrayerType) -> Unit = {},
     onLogBatchClicked: () -> Unit = {},
     onHistoryClicked: () -> Unit = {},
+    onSettingsClicked: () -> Unit = {},
+    onAdjustClicked: (PrayerType) -> Unit = {},
+    onAdjustmentSignChanged: (Boolean) -> Unit = {},
+    onAdjustmentMagnitudeChanged: (String) -> Unit = {},
+    onAdjustmentNoteChanged: (String) -> Unit = {},
+    onConfirmAdjustment: () -> Unit = {},
+    onDismissAdjustmentDialog: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -89,13 +112,23 @@ fun DashboardContent(
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.primary
                 )
-                IconButton(onClick = onHistoryClicked, modifier = Modifier.size(36.dp)) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.List,
-                        contentDescription = "History",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
-                    )
+                Row {
+                    IconButton(onClick = onHistoryClicked, modifier = Modifier.size(36.dp)) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.List,
+                            contentDescription = "History",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    IconButton(onClick = onSettingsClicked, modifier = Modifier.size(36.dp)) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
 
@@ -144,10 +177,22 @@ fun DashboardContent(
                         } else {
                             MaterialTheme.colorScheme.onSecondaryContainer
                         },
-                        onQuickLog = { onQuickLog(row.prayerType) }
+                        onQuickLog = { onQuickLog(row.prayerType) },
+                        onAdjustClicked = { onAdjustClicked(row.prayerType) }
                     )
                 }
             }
+        }
+
+        uiState.adjustmentDialog?.let { dialog ->
+            AdjustmentDialog(
+                dialog = dialog,
+                onSignChanged = onAdjustmentSignChanged,
+                onMagnitudeChanged = onAdjustmentMagnitudeChanged,
+                onNoteChanged = onAdjustmentNoteChanged,
+                onConfirm = onConfirmAdjustment,
+                onDismiss = onDismissAdjustmentDialog
+            )
         }
     }
 }
@@ -184,7 +229,8 @@ private fun PrayerProgressRow(
     row: PrayerRowUiState,
     tintContainer: Color,
     tintContent: Color,
-    onQuickLog: () -> Unit
+    onQuickLog: () -> Unit,
+    onAdjustClicked: () -> Unit
 ) {
     Surface(
         shape = QazaShapes.cardShape,
@@ -219,18 +265,31 @@ private fun PrayerProgressRow(
                         )
                     }
                 }
-                IconButton(
-                    onClick = onQuickLog,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(MaterialTheme.colorScheme.primary, CircleShape)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Log one ${row.prayerType.displayName()}",
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(18.dp)
-                    )
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(
+                        onClick = onAdjustClicked,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Adjust ${row.prayerType.displayName()}",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                    IconButton(
+                        onClick = onQuickLog,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(MaterialTheme.colorScheme.primary, CircleShape)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Log one ${row.prayerType.displayName()}",
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
             Spacer(Modifier.height(9.dp))
@@ -246,6 +305,67 @@ private fun PrayerProgressRow(
             )
         }
     }
+}
+
+@Composable
+private fun AdjustmentDialog(
+    dialog: AdjustmentDialogState,
+    onSignChanged: (Boolean) -> Unit,
+    onMagnitudeChanged: (String) -> Unit,
+    onNoteChanged: (String) -> Unit,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Adjust ${dialog.prayerType.displayName()}") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    text = "Use + to add missed prayers back, − to correct an overcount.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilterChip(
+                        selected = !dialog.isNegative,
+                        onClick = { onSignChanged(false) },
+                        label = { Text("+") }
+                    )
+                    FilterChip(
+                        selected = dialog.isNegative,
+                        onClick = { onSignChanged(true) },
+                        label = { Text("−") }
+                    )
+                }
+                OutlinedTextField(
+                    value = dialog.magnitudeInput,
+                    onValueChange = onMagnitudeChanged,
+                    label = { Text("Amount") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = dialog.note,
+                    onValueChange = onNoteChanged,
+                    label = { Text("Note (optional)") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm, enabled = dialog.canConfirm) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 private fun CompletionProjection.displayText(): String = when (this) {
