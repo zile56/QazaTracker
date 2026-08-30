@@ -10,25 +10,39 @@ streaks, and no daily-checklist UI.
 
 ## Status
 
-Actively in development. Built bottom-up per the project's build order
-(data → domain → UI, one screen at a time):
+All five core screens from the build order are implemented and have been
+live-verified on a Pixel 8 emulator (API 37), plus two additions beyond
+the original screen list:
 
 - ✅ **Data layer** — Room entities, DAOs with aggregation queries, and
   in-memory database unit tests.
-- ✅ **Domain layer** — the four core use cases (baseline calculation,
-  logging completions, applying adjustments, projecting a completion
-  date), with unit tests covering leap-year edge cases in the baseline
-  calculation.
+- ✅ **Domain layer** — the core use cases (baseline calculation, logging
+  completions, applying adjustments, projecting a completion date,
+  scheduling notifications), with unit tests covering leap-year edge
+  cases in the baseline calculation.
 - ✅ **Dependency injection** — Hilt wired end-to-end (application,
-  modules, constructor injection).
-- ✅ **Onboarding screen** — baseline entry (exact-dates vs. age-estimate
-  toggle), wired to a Hilt-injected ViewModel, shows the calculated
-  result on-screen.
-- ⏳ **Emulator / visual verification** — not yet run on a device or
-  emulator in this environment; build and tests pass, but the UI hasn't
-  been eyeballed yet.
-- ⏳ **Remaining screens** — baseline summary, main dashboard, batch
-  logging, history/ledger — in progress, one at a time.
+  modules, constructor injection, `@HiltWorker`).
+- ✅ **Onboarding** — baseline entry (exact-dates vs. age-estimate
+  toggle).
+- ✅ **Baseline summary** — calculated totals per prayer type, editable
+  before confirming.
+- ✅ **Dashboard** — total remaining count, per-prayer progress rows,
+  pace projection, quick single-tap logging, and manual adjustments.
+- ✅ **Batch logging** — multi-day, multi-prayer-type logging in one
+  action.
+- ✅ **History/ledger** — a merged, batch-collapsing timeline of
+  completions and adjustments.
+- ✅ **Settings** *(beyond the original screen list)* — notification
+  frequency (DataStore Preferences-backed), a full-data JSON export,
+  app version, and an About block. Reachable via a gear icon next to
+  History on the Dashboard.
+- ✅ **Reminder notifications** *(beyond the original screen list)* —
+  WorkManager-scheduled reminders (Never/Weekly/Bi-weekly/Daily) tied to
+  the Settings preference, rescheduled immediately on change, with a
+  one-time `POST_NOTIFICATIONS` prompt on API 33+.
+- ✅ **Custom fonts** — Caprasimo (headings) and Figtree (body) bundled
+  as real `FontFamily` resources.
+- ⏳ **Ad monetization** — not started; see Known Gaps below.
 
 ## Tech Stack
 
@@ -37,7 +51,12 @@ Actively in development. Built bottom-up per the project's build order
   built from UseCases
 - **Room** (+ Room KTX) for persistence — the sole source of truth,
   fully offline
-- **Hilt** for dependency injection
+- **Hilt** for dependency injection, including `androidx.hilt:hilt-work`
+  for injecting WorkManager workers
+- **DataStore Preferences** for app settings (notification frequency,
+  a one-time permission-prompt flag) — Room remains the sole source of
+  truth for prayer data itself
+- **WorkManager** for periodic reminder notifications
 - **Kotlin Coroutines / Flow** throughout
 - Target: **min SDK 26** (Android 8.0), for `java.time` without
   desugaring
@@ -79,6 +98,19 @@ hand-rolled `years * 365` arithmetic, specifically because that
 approximation breaks on leap years — see the leap-year test cases in
 `CalculateBaselineUseCaseTest`.
 
+### Notification scheduling
+
+`ScheduleNotificationsUseCase` persists the chosen frequency to
+DataStore *and* (re)schedules a `PeriodicWorkRequest` in one step, so
+the two can never drift apart. A `NotificationScheduler` domain
+interface keeps WorkManager entirely out of the domain layer — the real
+implementation (`WorkManagerNotificationScheduler`) lives under
+`notification/`, alongside the worker itself and a pure, unit-tested
+`NotificationFrequency -> Duration` mapping. On every cold start,
+`QazaTrackerApp` re-applies whatever frequency is currently stored, so a
+fresh install's default (Weekly) is actually scheduled without the user
+having to open Settings first.
+
 ## How to Build
 
 1. Open the project root in Android Studio (a recent version with
@@ -97,18 +129,23 @@ From the command line:
 
 ## Known Gaps
 
-- **No emulator/AVD has been used to verify the UI yet** in this
-  development environment — the app builds and all unit/instrumented
-  test sources compile, but nobody has looked at the onboarding screen
-  running on an actual device.
+- **Ad monetization isn't implemented.** CLAUDE.md scopes the app as
+  free with light ads, gated behind an `AdProvider` interface so SDK
+  calls never touch domain/data code directly — that interface doesn't
+  exist yet.
 - **Dark theme colors are derived, not sourced from the design import.**
   The Claude Design handoff only defined a light palette; the dark
   `ColorScheme` in `Theme.kt` is a same-hue variant put together for
   parity, not part of the original spec.
-- **Custom fonts aren't bundled yet.** The design calls for Caprasimo
-  (headings) and Figtree (body) via Google Fonts; no `.ttf` files have
-  been added to the project, so the type scale currently renders in the
-  platform default font.
+- **No runtime-permission rationale UI.** The one-time
+  `POST_NOTIFICATIONS` prompt (API 33+) uses the system dialog directly
+  with no explanatory screen beforehand; denying it just means reminder
+  notifications silently never fire — nothing else in the app is
+  affected.
+- **Female exemption periods are reserved but not exposed.** Per
+  CLAUDE.md, `AdjustmentReason.EXEMPTION` exists in the schema so this
+  can be added later without a data migration, but there's no v1 UI for
+  it.
 
 ## Full Project Context
 
