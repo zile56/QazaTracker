@@ -23,9 +23,10 @@ local.properties
 *.dex
 *.hprof
 
-# Signing material — never commit keystores
+# Signing material — never commit keystores or their passwords
 *.jks
 *.keystore
+/keystore.properties
 
 # Kotlin/Gradle local caches
 .kotlin/

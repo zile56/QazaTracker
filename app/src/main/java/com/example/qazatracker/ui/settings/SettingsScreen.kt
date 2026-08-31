@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Share
@@ -85,12 +87,15 @@ fun SettingsContent(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(Modifier.height(10.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.horizontalScroll(rememberScrollState())
+                ) {
                     NotificationFrequency.entries.forEach { frequency ->
                         FilterChip(
                             selected = uiState.notificationFrequency == frequency,
                             onClick = { onFrequencySelected(frequency) },
-                            label = { Text(frequency.displayName()) }
+                            label = { Text(frequency.displayName(), maxLines = 1, softWrap = false) }
                         )
                     }
                 }

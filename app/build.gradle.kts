@@ -1,9 +1,24 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.ksp)
     alias(libs.plugins.hilt.android)
 }
+
+// Release signing credentials live in keystore.properties (gitignored, never committed) —
+// not gradle.properties, which is already tracked in this repo for shared build settings.
+// Absent for anyone without that file (CI, other clones), in which case release builds
+// simply go unsigned rather than failing the whole Gradle sync.
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystoreProperties = Properties().apply {
+    if (keystorePropertiesFile.exists()) {
+        load(FileInputStream(keystorePropertiesFile))
+    }
+}
+val hasReleaseSigning = keystorePropertiesFile.exists()
 
 android {
     namespace = "com.example.qazatracker"
@@ -28,10 +43,24 @@ android {
         }
     }
 
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = file(keystoreProperties["releaseStoreFile"] as String)
+                storePassword = keystoreProperties["releaseStorePassword"] as String
+                keyAlias = keystoreProperties["releaseKeyAlias"] as String
+                keyPassword = keystoreProperties["releaseKeyPassword"] as String
+            }
+        }
+    }
+
     buildTypes {
         release {
             optimization {
                 enable = false
+            }
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.getByName("release")
             }
         }
     }
