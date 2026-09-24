@@ -20,6 +20,7 @@ import com.zilehasnain.qazatracker.ui.dashboard.DashboardScreen
 import com.zilehasnain.qazatracker.ui.history.HistoryScreen
 import com.zilehasnain.qazatracker.ui.onboarding.OnboardingScreen
 import com.zilehasnain.qazatracker.ui.settings.SettingsScreen
+import com.zilehasnain.qazatracker.ui.statistics.StatisticsScreen
 import com.zilehasnain.qazatracker.ui.tutorial.TutorialScreen
 
 /**
@@ -85,7 +86,8 @@ fun QazaNavHost(modifier: Modifier = Modifier, appViewModel: AppViewModel = hilt
             DashboardScreen(
                 onLogBatchClicked = { navController.navigate(Routes.BATCH_LOGGING) },
                 onHistoryClicked = { navController.navigate(Routes.HISTORY) },
-                onSettingsClicked = { navController.navigate(Routes.SETTINGS) }
+                onSettingsClicked = { navController.navigate(Routes.SETTINGS) },
+                onStatisticsClicked = { navController.navigate(Routes.STATISTICS) }
             )
         }
 
@@ -102,6 +104,10 @@ fun QazaNavHost(modifier: Modifier = Modifier, appViewModel: AppViewModel = hilt
 
         composable(Routes.SETTINGS) {
             SettingsScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable(Routes.STATISTICS) {
+            StatisticsScreen(onBack = { navController.popBackStack() })
         }
     }
 }

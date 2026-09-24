@@ -31,6 +31,7 @@ class DashboardScreenTest {
         onLogBatchClicked: () -> Unit = {},
         onHistoryClicked: () -> Unit = {},
         onSettingsClicked: () -> Unit = {},
+        onStatisticsClicked: () -> Unit = {},
         onAdjustClicked: (PrayerType) -> Unit = {},
         onAdjustmentSignChanged: (Boolean) -> Unit = {},
         onAdjustmentMagnitudeChanged: (String) -> Unit = {},
@@ -47,6 +48,7 @@ class DashboardScreenTest {
                     onLogBatchClicked = onLogBatchClicked,
                     onHistoryClicked = onHistoryClicked,
                     onSettingsClicked = onSettingsClicked,
+                    onStatisticsClicked = onStatisticsClicked,
                     onAdjustClicked = onAdjustClicked,
                     onAdjustmentSignChanged = onAdjustmentSignChanged,
                     onAdjustmentMagnitudeChanged = onAdjustmentMagnitudeChanged,
@@ -217,6 +219,19 @@ class DashboardScreenTest {
         )
 
         composeTestRule.onNodeWithContentDescription("Settings").performClick()
+
+        assertTrue(clicked)
+    }
+
+    @Test
+    fun tappingStatisticsIcon_invokesCallback() {
+        var clicked = false
+        setContent(
+            uiState = DashboardUiState(rows = rows(completedEach = 0, remainingEach = 10)),
+            onStatisticsClicked = { clicked = true }
+        )
+
+        composeTestRule.onNodeWithContentDescription("Statistics").performClick()
 
         assertTrue(clicked)
     }

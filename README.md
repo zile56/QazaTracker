@@ -35,6 +35,10 @@ the original screen list:
   action.
 - ✅ **History/ledger** — a merged, batch-collapsing timeline of
   completions, adjustments and milestones.
+- ✅ **Statistics** *(beyond the original screen list)* — per-month
+  completions for each prayer type as a bar chart and progress rows, with
+  previous/next month navigation. Reachable from the chart icon on the
+  Dashboard.
 - ✅ **Settings** *(beyond the original screen list)* — notification
   frequency (DataStore Preferences-backed), a full-data JSON export,
   app version, and an About block. Reachable via a gear icon next to
