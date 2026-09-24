@@ -1,6 +1,8 @@
 package com.zilehasnain.qazatracker.ui.dashboard
 
 import com.zilehasnain.qazatracker.domain.model.EstimateHorizon
+import com.zilehasnain.qazatracker.ui.common.formatLongDate
+import com.zilehasnain.qazatracker.ui.common.formatShortDate
 import com.zilehasnain.qazatracker.ui.theme.PaceGreenContainer
 import com.zilehasnain.qazatracker.ui.theme.PaceGreenContainerDark
 import java.time.LocalDate
@@ -16,12 +18,12 @@ class CompletionEstimateFormattingTest {
 
     @Test
     fun `a date this year is month and day`() {
-        assertEquals("December 15", formatEstimateDate(LocalDate.of(2026, 12, 15), today))
+        assertEquals("December 15", formatLongDate(LocalDate.of(2026, 12, 15), today))
     }
 
     @Test
     fun `a date in another year includes the year`() {
-        assertEquals("December 15, 2027", formatEstimateDate(LocalDate.of(2027, 12, 15), today))
+        assertEquals("December 15, 2027", formatLongDate(LocalDate.of(2027, 12, 15), today))
     }
 
     @Test

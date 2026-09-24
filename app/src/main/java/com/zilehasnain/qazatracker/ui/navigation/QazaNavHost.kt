@@ -14,6 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.zilehasnain.qazatracker.ui.achievements.AchievementsScreen
 import com.zilehasnain.qazatracker.ui.baseline.BaselineSummaryScreen
 import com.zilehasnain.qazatracker.ui.batch.BatchLoggingScreen
 import com.zilehasnain.qazatracker.ui.dashboard.DashboardScreen
@@ -87,7 +88,8 @@ fun QazaNavHost(modifier: Modifier = Modifier, appViewModel: AppViewModel = hilt
                 onLogBatchClicked = { navController.navigate(Routes.BATCH_LOGGING) },
                 onHistoryClicked = { navController.navigate(Routes.HISTORY) },
                 onSettingsClicked = { navController.navigate(Routes.SETTINGS) },
-                onStatisticsClicked = { navController.navigate(Routes.STATISTICS) }
+                onStatisticsClicked = { navController.navigate(Routes.STATISTICS) },
+                onAchievementsClicked = { navController.navigate(Routes.ACHIEVEMENTS) }
             )
         }
 
@@ -108,6 +110,10 @@ fun QazaNavHost(modifier: Modifier = Modifier, appViewModel: AppViewModel = hilt
 
         composable(Routes.STATISTICS) {
             StatisticsScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable(Routes.ACHIEVEMENTS) {
+            AchievementsScreen(onBack = { navController.popBackStack() })
         }
     }
 }

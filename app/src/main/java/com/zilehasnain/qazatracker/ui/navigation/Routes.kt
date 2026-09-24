@@ -10,6 +10,7 @@ object Routes {
     const val HISTORY = "history"
     const val SETTINGS = "settings"
     const val STATISTICS = "statistics"
+    const val ACHIEVEMENTS = "achievements"
 
     const val MISSED_DAYS_ARG = "missedDays"
     const val METHOD_ARG = "method"

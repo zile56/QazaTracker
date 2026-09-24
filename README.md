@@ -41,6 +41,10 @@ the original screen list:
   completions for each prayer type as a bar chart and progress rows, with
   previous/next month navigation. Reachable from the chart icon on the
   Dashboard.
+- ✅ **Achievements** *(beyond the original screen list)* — a trophy-icon
+  screen grouping what's been unlocked: prayer-type milestones, the current
+  and best streak, and 25/50/75/100% progress badges, each with the day it
+  was unlocked. Derived from the existing logs, so nothing extra is stored.
 - ✅ **Home-screen widget** *(beyond the original screen list)* — a compact
   3x3 widget with all five prayer types, what's left of each, and a +1
   button per row; it logs through the same use case as the app and stays in

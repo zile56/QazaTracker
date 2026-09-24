@@ -13,7 +13,9 @@ data class StreakData(
     val currentStreak: Int,
     val longestStreak: Int,
     val lastLoggedDate: LocalDate?,
-    val streakBrokenDate: LocalDate? = null
+    val streakBrokenDate: LocalDate? = null,
+    /** The last day of the best run (the most recent one, on a tie); null when nothing is logged. */
+    val longestStreakEndedOn: LocalDate? = null
 ) {
     companion object {
         val None = StreakData(currentStreak = 0, longestStreak = 0, lastLoggedDate = null)

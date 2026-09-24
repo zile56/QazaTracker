@@ -33,7 +33,9 @@ import androidx.compose.ui.unit.sp
 import com.zilehasnain.qazatracker.domain.model.CompletionEstimate
 import com.zilehasnain.qazatracker.domain.model.EstimateConfidence
 import com.zilehasnain.qazatracker.domain.model.EstimateHorizon
+import com.zilehasnain.qazatracker.ui.common.formatLongDate
 import com.zilehasnain.qazatracker.ui.common.formatPercent
+import com.zilehasnain.qazatracker.ui.common.formatShortDate
 import com.zilehasnain.qazatracker.ui.theme.PaceGreenAccent
 import com.zilehasnain.qazatracker.ui.theme.PaceGreenAccentDark
 import com.zilehasnain.qazatracker.ui.theme.PaceGreenContainer
@@ -54,7 +56,6 @@ import com.zilehasnain.qazatracker.ui.theme.PaceYellowContent
 import com.zilehasnain.qazatracker.ui.theme.PaceYellowContentDark
 import com.zilehasnain.qazatracker.ui.theme.QazaShapes
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.roundToInt
 
@@ -107,7 +108,7 @@ internal fun CompletionEstimateCard(
             Spacer(Modifier.height(8.dp))
             Surface(shape = QazaShapes.pillShape, color = colors.container) {
                 Text(
-                    text = formatEstimateDate(estimate.estimatedDate, today),
+                    text = formatLongDate(estimate.estimatedDate, today),
                     style = MaterialTheme.typography.titleLarge.copy(fontSize = 24.sp, lineHeight = 30.sp),
                     fontWeight = FontWeight.SemiBold,
                     color = colors.content,
@@ -260,19 +261,6 @@ private fun BreakdownRow(label: String, value: String, detail: String? = null) {
 
 // ---- Text helpers (internal so they can be unit-tested) ----
 
-/** "December 15", or "December 15, 2028" once the year isn't the current one. */
-internal fun formatEstimateDate(date: LocalDate, today: LocalDate): String =
-    date.format(dateFormatter(long = true, includeYear = date.year != today.year))
-
-/** "Sep 24", or "Sep 24, 2028" once the year isn't the current one. */
-internal fun formatShortDate(date: LocalDate, today: LocalDate): String =
-    date.format(dateFormatter(long = false, includeYear = date.year != today.year))
-
-private fun dateFormatter(long: Boolean, includeYear: Boolean): DateTimeFormatter {
-    val month = if (long) "MMMM" else "MMM"
-    return DateTimeFormatter.ofPattern(if (includeYear) "$month d, yyyy" else "$month d", Locale.getDefault())
-}
-
 /** "~1 day", "~45 days", then months, then years, so a far-off finish stays readable. */
 internal fun formatRemaining(days: Int): String = when {
     days <= 1 -> "~1 day"
@@ -302,7 +290,7 @@ private fun projectionDetails(estimate: CompletionEstimate, today: LocalDate): S
     }
     return "At ${formatPaceValue(estimate.averagePrayersPerDay)} prayers a day, your " +
         "${estimate.prayersRemaining} remaining prayers would take about ${daysPhrase(estimate.daysRemaining)}, " +
-        "finishing ${formatEstimateDate(estimate.estimatedDate, today)}. Pace is the " +
+        "finishing ${formatLongDate(estimate.estimatedDate, today)}. Pace is the " +
         "${estimate.prayersCompleted} prayers you've completed divided by the ${daysPhrase(estimate.daysTracked)} " +
         "since you started on ${formatShortDate(estimate.trackingStartedOn, today)}. $confidenceNote"
 }

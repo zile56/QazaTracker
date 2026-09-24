@@ -54,6 +54,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zilehasnain.qazatracker.domain.model.CompletionProjection
 import com.zilehasnain.qazatracker.domain.model.PrayerType
 import com.zilehasnain.qazatracker.domain.model.StreakData
+import com.zilehasnain.qazatracker.ui.common.AchievementsIcon
 import com.zilehasnain.qazatracker.ui.common.StatisticsIcon
 import com.zilehasnain.qazatracker.ui.common.displayName
 import com.zilehasnain.qazatracker.ui.theme.QazaShapes
@@ -66,7 +67,8 @@ fun DashboardScreen(
     onLogBatchClicked: () -> Unit = {},
     onHistoryClicked: () -> Unit = {},
     onSettingsClicked: () -> Unit = {},
-    onStatisticsClicked: () -> Unit = {}
+    onStatisticsClicked: () -> Unit = {},
+    onAchievementsClicked: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     DashboardContent(
@@ -76,6 +78,7 @@ fun DashboardScreen(
         onHistoryClicked = onHistoryClicked,
         onSettingsClicked = onSettingsClicked,
         onStatisticsClicked = onStatisticsClicked,
+        onAchievementsClicked = onAchievementsClicked,
         onAdjustClicked = viewModel::onAdjustClicked,
         onAdjustmentSignChanged = viewModel::onAdjustmentSignChanged,
         onAdjustmentMagnitudeChanged = viewModel::onAdjustmentMagnitudeChanged,
@@ -98,6 +101,7 @@ fun DashboardContent(
     onHistoryClicked: () -> Unit = {},
     onSettingsClicked: () -> Unit = {},
     onStatisticsClicked: () -> Unit = {},
+    onAchievementsClicked: () -> Unit = {},
     onAdjustClicked: (PrayerType) -> Unit = {},
     onAdjustmentSignChanged: (Boolean) -> Unit = {},
     onAdjustmentMagnitudeChanged: (String) -> Unit = {},
@@ -134,6 +138,14 @@ fun DashboardContent(
                     color = MaterialTheme.colorScheme.primary
                 )
                 Row {
+                    IconButton(onClick = onAchievementsClicked, modifier = Modifier.size(36.dp)) {
+                        Icon(
+                            imageVector = AchievementsIcon,
+                            contentDescription = "Achievements",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                     IconButton(onClick = onStatisticsClicked, modifier = Modifier.size(36.dp)) {
                         Icon(
                             imageVector = StatisticsIcon,

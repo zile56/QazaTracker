@@ -27,11 +27,16 @@ class CalculateStreakUseCase @Inject constructor() {
         val loggedDays = completions.map { it.timestamp.atZone(zone).toLocalDate() }.toSortedSet()
 
         var longest = 0
+        var longestEndedOn: LocalDate? = null
         var run = 0
         var previous: LocalDate? = null
         for (day in loggedDays) {
             run = if (previous != null && day == previous.plusDays(1)) run + 1 else 1
-            longest = maxOf(longest, run)
+            // >= so that on a tie the most recent run is the one reported as the best.
+            if (run >= longest) {
+                longest = run
+                longestEndedOn = day
+            }
             previous = day
         }
 
@@ -43,7 +48,8 @@ class CalculateStreakUseCase @Inject constructor() {
             currentStreak = if (alive) run else 0,
             longestStreak = longest,
             lastLoggedDate = lastLogged,
-            streakBrokenDate = if (alive) null else lastLogged.plusDays(1)
+            streakBrokenDate = if (alive) null else lastLogged.plusDays(1),
+            longestStreakEndedOn = longestEndedOn
         )
     }
 }

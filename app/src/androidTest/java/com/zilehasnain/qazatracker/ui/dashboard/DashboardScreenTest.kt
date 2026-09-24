@@ -35,6 +35,7 @@ class DashboardScreenTest {
         onHistoryClicked: () -> Unit = {},
         onSettingsClicked: () -> Unit = {},
         onStatisticsClicked: () -> Unit = {},
+        onAchievementsClicked: () -> Unit = {},
         onAdjustClicked: (PrayerType) -> Unit = {},
         onAdjustmentSignChanged: (Boolean) -> Unit = {},
         onAdjustmentMagnitudeChanged: (String) -> Unit = {},
@@ -52,6 +53,7 @@ class DashboardScreenTest {
                     onHistoryClicked = onHistoryClicked,
                     onSettingsClicked = onSettingsClicked,
                     onStatisticsClicked = onStatisticsClicked,
+                    onAchievementsClicked = onAchievementsClicked,
                     onAdjustClicked = onAdjustClicked,
                     onAdjustmentSignChanged = onAdjustmentSignChanged,
                     onAdjustmentMagnitudeChanged = onAdjustmentMagnitudeChanged,
@@ -289,6 +291,19 @@ class DashboardScreenTest {
         )
 
         composeTestRule.onNodeWithContentDescription("Settings").performClick()
+
+        assertTrue(clicked)
+    }
+
+    @Test
+    fun tappingAchievementsIcon_invokesCallback() {
+        var clicked = false
+        setContent(
+            uiState = DashboardUiState(rows = rows(completedEach = 0, remainingEach = 10)),
+            onAchievementsClicked = { clicked = true }
+        )
+
+        composeTestRule.onNodeWithContentDescription("Achievements").performClick()
 
         assertTrue(clicked)
     }

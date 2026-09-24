@@ -115,6 +115,44 @@ class CalculateStreakUseCaseTest {
         assertEquals(1, streak.currentStreak)
     }
 
+    // ---- When the best streak was reached ----
+
+    @Test
+    fun `the best streak's end date is the last day of the best run`() {
+        // A 5-day run ending 8 days ago, then a 2-day run ending today.
+        val streak = streakFor(
+            logged(12), logged(11), logged(10), logged(9), logged(8),
+            logged(1), logged(0)
+        )
+
+        assertEquals(5, streak.longestStreak)
+        assertEquals(today.minusDays(8), streak.longestStreakEndedOn)
+    }
+
+    @Test
+    fun `when the current streak is the best it ends today`() {
+        val streak = streakFor(logged(2), logged(1), logged(0))
+
+        assertEquals(today, streak.longestStreakEndedOn)
+    }
+
+    @Test
+    fun `on a tie the most recent run is reported as the best`() {
+        // Two 3-day runs: the older ends 9 days ago, the newer 2 days ago.
+        val streak = streakFor(
+            logged(11), logged(10), logged(9),
+            logged(4), logged(3), logged(2)
+        )
+
+        assertEquals(3, streak.longestStreak)
+        assertEquals(today.minusDays(2), streak.longestStreakEndedOn)
+    }
+
+    @Test
+    fun `with nothing logged there is no best-streak date`() {
+        assertEquals(null, streakFor().longestStreakEndedOn)
+    }
+
     @Test
     fun `entry order doesn't matter`() {
         val shuffled = (logged(0) + logged(2) + logged(1)).shuffled(java.util.Random(7))
