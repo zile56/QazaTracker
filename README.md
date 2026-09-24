@@ -49,6 +49,12 @@ the original screen list:
   3x3 widget with all five prayer types, what's left of each, and a +1
   button per row; it logs through the same use case as the app and stays in
   sync in both directions via the shared database.
+- ✅ **Prayer times** *(beyond the original screen list)* — today's five prayers plus sunrise,
+  calculated entirely on the device (Adhan library, pure maths: no network, no INTERNET
+  permission). "Find your region" searches ~190 countries and suggests the local
+  calculation method, with alternatives and custom Fajr/Isha angles. Only approximate
+  location is requested, and it never leaves the phone. Reachable from the mosque icon on
+  the Dashboard and from Settings.
 - ✅ **Settings** *(beyond the original screen list)* — notification
   frequency (DataStore Preferences-backed), a full-data JSON export,
   app version, and an About block. Reachable via a gear icon next to
@@ -176,5 +182,5 @@ This repo is developed against a local `CLAUDE.md` project-instructions
 file (not published here) covering the complete set of scope decisions,
 target stack details, the full data schema, screen-by-screen design
 direction, and things intentionally being kept out of v1 (no calendar
-UI, no adhan/prayer-time features, no login system, etc.). Ask the
+UI, no adhan sound/call-to-prayer, no login system, etc.). Ask the
 maintainer if you need that context.

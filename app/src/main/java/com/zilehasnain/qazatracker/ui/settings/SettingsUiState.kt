@@ -4,6 +4,7 @@ import com.zilehasnain.qazatracker.domain.model.NotificationFrequency
 
 data class SettingsUiState(
     val notificationFrequency: NotificationFrequency = NotificationFrequency.WEEKLY,
+    val regionName: String? = null,
     val versionName: String = "",
     val exportState: ExportState = ExportState.Idle
 )

@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.zilehasnain.qazatracker.BuildConfig
 import com.zilehasnain.qazatracker.domain.model.NotificationFrequency
 import com.zilehasnain.qazatracker.domain.repository.DataExportRepository
+import com.zilehasnain.qazatracker.domain.repository.PrayerTimesSettingsRepository
+import com.zilehasnain.qazatracker.domain.model.RegionCatalog
 import com.zilehasnain.qazatracker.domain.repository.SettingsRepository
 import com.zilehasnain.qazatracker.domain.usecase.ScheduleNotificationsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,6 +20,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
+    private val prayerTimesSettings: PrayerTimesSettingsRepository,
     private val dataExportRepository: DataExportRepository,
     private val scheduleNotifications: ScheduleNotificationsUseCase
 ) : ViewModel() {
@@ -29,6 +32,14 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             settingsRepository.observeNotificationFrequency().collect { frequency ->
                 _uiState.update { it.copy(notificationFrequency = frequency) }
+            }
+        }
+    }
+
+    init {
+        viewModelScope.launch {
+            prayerTimesSettings.observeSelection().collect { selection ->
+                _uiState.update { it.copy(regionName = RegionCatalog.byCode(selection.countryCode)?.name) }
             }
         }
     }

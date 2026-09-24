@@ -4,6 +4,9 @@
 
     <!-- Required on API 33+ to actually post the reminder notification. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Approximate location only: used on-device to pick the coordinates for prayer times. Never sent anywhere. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-feature android:name="android.hardware.location" android:required="false" />
 
     <application
         android:name=".QazaTrackerApp"

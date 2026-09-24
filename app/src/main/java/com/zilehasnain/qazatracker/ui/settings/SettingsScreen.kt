@@ -39,7 +39,8 @@ import com.zilehasnain.qazatracker.ui.theme.QazaShapes
 fun SettingsScreen(
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel(),
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onPrayerTimesClicked: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     SettingsContent(
@@ -47,6 +48,7 @@ fun SettingsScreen(
         onBack = onBack,
         onFrequencySelected = viewModel::onFrequencySelected,
         onExportClicked = viewModel::onExportClicked,
+        onPrayerTimesClicked = onPrayerTimesClicked,
         modifier = modifier
     )
 }
@@ -57,6 +59,7 @@ fun SettingsContent(
     onBack: () -> Unit = {},
     onFrequencySelected: (NotificationFrequency) -> Unit = {},
     onExportClicked: () -> Unit = {},
+    onPrayerTimesClicked: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -98,6 +101,16 @@ fun SettingsContent(
                             label = { Text(frequency.displayName(), maxLines = 1, softWrap = false) }
                         )
                     }
+                }
+            }
+
+            Spacer(Modifier.height(20.dp))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            Spacer(Modifier.height(20.dp))
+
+            SettingsSection(title = "Prayer times") {
+                TextButton(onClick = onPrayerTimesClicked, contentPadding = PaddingValues(0.dp)) {
+                    Text("Your region: ${uiState.regionName ?: "Not set"}  ▶")
                 }
             }
 

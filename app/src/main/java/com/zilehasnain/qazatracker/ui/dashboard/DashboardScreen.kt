@@ -55,6 +55,7 @@ import com.zilehasnain.qazatracker.domain.model.CompletionProjection
 import com.zilehasnain.qazatracker.domain.model.PrayerType
 import com.zilehasnain.qazatracker.domain.model.StreakData
 import com.zilehasnain.qazatracker.ui.common.AchievementsIcon
+import com.zilehasnain.qazatracker.ui.common.PrayerTimesIcon
 import com.zilehasnain.qazatracker.ui.common.StatisticsIcon
 import com.zilehasnain.qazatracker.ui.common.displayName
 import com.zilehasnain.qazatracker.ui.theme.QazaShapes
@@ -68,7 +69,8 @@ fun DashboardScreen(
     onHistoryClicked: () -> Unit = {},
     onSettingsClicked: () -> Unit = {},
     onStatisticsClicked: () -> Unit = {},
-    onAchievementsClicked: () -> Unit = {}
+    onAchievementsClicked: () -> Unit = {},
+    onPrayerTimesClicked: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     DashboardContent(
@@ -79,6 +81,7 @@ fun DashboardScreen(
         onSettingsClicked = onSettingsClicked,
         onStatisticsClicked = onStatisticsClicked,
         onAchievementsClicked = onAchievementsClicked,
+        onPrayerTimesClicked = onPrayerTimesClicked,
         onAdjustClicked = viewModel::onAdjustClicked,
         onAdjustmentSignChanged = viewModel::onAdjustmentSignChanged,
         onAdjustmentMagnitudeChanged = viewModel::onAdjustmentMagnitudeChanged,
@@ -102,6 +105,7 @@ fun DashboardContent(
     onSettingsClicked: () -> Unit = {},
     onStatisticsClicked: () -> Unit = {},
     onAchievementsClicked: () -> Unit = {},
+    onPrayerTimesClicked: () -> Unit = {},
     onAdjustClicked: (PrayerType) -> Unit = {},
     onAdjustmentSignChanged: (Boolean) -> Unit = {},
     onAdjustmentMagnitudeChanged: (String) -> Unit = {},
@@ -135,10 +139,20 @@ fun DashboardContent(
                 Text(
                     text = "QAZA TRACKER",
                     style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1,
+                    modifier = Modifier.weight(1f)
                 )
                 Row {
-                    IconButton(onClick = onAchievementsClicked, modifier = Modifier.size(36.dp)) {
+                    IconButton(onClick = onPrayerTimesClicked, modifier = Modifier.size(32.dp)) {
+                        Icon(
+                            imageVector = PrayerTimesIcon,
+                            contentDescription = "Prayer times",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    IconButton(onClick = onAchievementsClicked, modifier = Modifier.size(32.dp)) {
                         Icon(
                             imageVector = AchievementsIcon,
                             contentDescription = "Achievements",
@@ -146,7 +160,7 @@ fun DashboardContent(
                             modifier = Modifier.size(20.dp)
                         )
                     }
-                    IconButton(onClick = onStatisticsClicked, modifier = Modifier.size(36.dp)) {
+                    IconButton(onClick = onStatisticsClicked, modifier = Modifier.size(32.dp)) {
                         Icon(
                             imageVector = StatisticsIcon,
                             contentDescription = "Statistics",
@@ -154,7 +168,7 @@ fun DashboardContent(
                             modifier = Modifier.size(20.dp)
                         )
                     }
-                    IconButton(onClick = onHistoryClicked, modifier = Modifier.size(36.dp)) {
+                    IconButton(onClick = onHistoryClicked, modifier = Modifier.size(32.dp)) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.List,
                             contentDescription = "History",
@@ -162,7 +176,7 @@ fun DashboardContent(
                             modifier = Modifier.size(20.dp)
                         )
                     }
-                    IconButton(onClick = onSettingsClicked, modifier = Modifier.size(36.dp)) {
+                    IconButton(onClick = onSettingsClicked, modifier = Modifier.size(32.dp)) {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Settings",
