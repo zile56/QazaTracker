@@ -35,3 +35,27 @@ val Sage900 = Color(0xFF272E1B)
 val Sage = Color(0xFF7A8A5E)
 
 val Divider = Color(0x29201E1D) // ink at ~16% alpha
+
+// Colour coding for the estimated completion date (near = green, medium = yellow, far = orange),
+// tuned warm to sit with the rest of the palette. Each has a container/content pair for text on a
+// tinted pill, plus an accent for the timeline bar; the dark set keeps the same hues readable
+// on the dark surfaces.
+val PaceGreenContainer = Color(0xFFD3E4B3)
+val PaceGreenContent = Color(0xFF2F3B1B)
+val PaceGreenAccent = Color(0xFF7A8A5E)
+val PaceYellowContainer = Color(0xFFF3DE94)
+val PaceYellowContent = Color(0xFF4D3C05)
+val PaceYellowAccent = Color(0xFFC9A23A)
+val PaceOrangeContainer = Color(0xFFF2C49F)
+val PaceOrangeContent = Color(0xFF5A2B0A)
+val PaceOrangeAccent = Color(0xFFC67139)
+
+val PaceGreenContainerDark = Color(0xFF3F4B2A)
+val PaceGreenContentDark = Color(0xFFD9EBB8)
+val PaceGreenAccentDark = Color(0xFF8FA073)
+val PaceYellowContainerDark = Color(0xFF5A4A12)
+val PaceYellowContentDark = Color(0xFFF6E6A6)
+val PaceYellowAccentDark = Color(0xFFD9B44A)
+val PaceOrangeContainerDark = Color(0xFF6B3A1B)
+val PaceOrangeContentDark = Color(0xFFF7D3B8)
+val PaceOrangeAccentDark = Color(0xFFD67F48)

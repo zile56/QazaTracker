@@ -1,12 +1,15 @@
 package com.zilehasnain.qazatracker.ui.dashboard
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import com.zilehasnain.qazatracker.domain.model.CompletionEstimate
 import com.zilehasnain.qazatracker.domain.model.CompletionProjection
+import com.zilehasnain.qazatracker.domain.model.EstimateConfidence
 import com.zilehasnain.qazatracker.domain.model.MilestoneData
 import com.zilehasnain.qazatracker.domain.model.PrayerMilestone
 import com.zilehasnain.qazatracker.domain.model.PrayerType
@@ -112,49 +115,116 @@ class DashboardScreenTest {
         composeTestRule.onNodeWithText("You are fully caught up").assertExists()
     }
 
-    @Test
-    fun estimatedProjection_showsMonthsMessage_forMultiMonthEstimate() {
-        setContent(
-            DashboardUiState(
-                rows = rows(completedEach = 10, remainingEach = 40),
-                projection = CompletionProjection.Estimated(
-                    projectedDate = LocalDate.now().plusDays(90),
-                    daysRemaining = 90
-                )
-            )
-        )
+    // ---- The estimate card (a real projection) ----
 
-        composeTestRule.onNodeWithText("At your pace, cleared in ~3 months").assertExists()
+    private fun estimate(
+        daysRemaining: Int = 45,
+        confidence: EstimateConfidence = EstimateConfidence.HIGH,
+        estimatedDate: LocalDate = LocalDate.now().plusDays(daysRemaining.toLong()),
+        pace: Float = 8.5f
+    ) = CompletionEstimate(
+        estimatedDate = estimatedDate,
+        daysRemaining = daysRemaining,
+        averagePrayersPerDay = pace,
+        confidence = confidence,
+        trackingStartedOn = LocalDate.now().minusDays(30),
+        daysTracked = 30,
+        daysLogged = 12,
+        prayersCompleted = 255,
+        prayersRemaining = 3287
+    )
+
+    private fun estimatedState(estimate: CompletionEstimate = estimate()) = DashboardUiState(
+        rows = rows(completedEach = 10, remainingEach = 40),
+        projection = CompletionProjection.Estimated(estimate)
+    )
+
+    @Test
+    fun estimatedProjection_showsHeadlineRemainingTimeAndPace() {
+        setContent(estimatedState(estimate(daysRemaining = 45, pace = 8.5f)))
+
+        composeTestRule.onNodeWithText("You'll catch up by", substring = true).assertExists()
+        composeTestRule.onNodeWithText("~45 days remaining at current pace", substring = true).assertExists()
+        composeTestRule.onNodeWithText("Logging ~8.5 prayers/day", substring = true).assertExists()
     }
 
     @Test
-    fun estimatedProjection_showsUnderAMonthMessage_forShortEstimate() {
-        setContent(
-            DashboardUiState(
-                rows = rows(completedEach = 45, remainingEach = 5),
-                projection = CompletionProjection.Estimated(
-                    projectedDate = LocalDate.now().plusDays(10),
-                    daysRemaining = 10
-                )
-            )
-        )
+    fun estimatedProjection_showsTheTimelineWithTodayStartAndPercentPassed() {
+        setContent(estimatedState())
 
-        composeTestRule.onNodeWithText("At your pace, cleared in under a month").assertExists()
+        composeTestRule.onNodeWithText("Today", substring = true).assertExists()
+        composeTestRule.onNodeWithText("Started ", substring = true).assertExists()
+        composeTestRule.onNodeWithText("of estimated time passed", substring = true).assertExists()
     }
 
     @Test
-    fun estimatedProjection_usesSingularMonth_forExactlyOneMonth() {
-        setContent(
-            DashboardUiState(
-                rows = rows(completedEach = 10, remainingEach = 30),
-                projection = CompletionProjection.Estimated(
-                    projectedDate = LocalDate.now().plusDays(30),
-                    daysRemaining = 30
-                )
-            )
-        )
+    fun farOffDate_showsTheYear() {
+        setContent(estimatedState(estimate(daysRemaining = 5000, estimatedDate = LocalDate.of(2099, 12, 15))))
 
-        composeTestRule.onNodeWithText("At your pace, cleared in ~1 month").assertExists()
+        composeTestRule.onNodeWithText("December 15, 2099", substring = true).assertExists()
+    }
+
+    @Test
+    fun lowConfidence_showsTheLimitedHistoryDisclaimer() {
+        setContent(estimatedState(estimate(confidence = EstimateConfidence.LOW)))
+
+        composeTestRule.onNodeWithText("Based on limited history", substring = true).assertExists()
+    }
+
+    @Test
+    fun mediumConfidence_showsNoDisclaimer() {
+        setContent(estimatedState(estimate(confidence = EstimateConfidence.MEDIUM)))
+        composeTestRule.onNodeWithText("Based on limited history", substring = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun highConfidence_showsNoDisclaimer() {
+        setContent(estimatedState(estimate(confidence = EstimateConfidence.HIGH)))
+
+        composeTestRule.onNodeWithText("Based on limited history", substring = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun tappingTheEstimate_opensTheBreakdown_andCloseDismissesIt() {
+        setContent(estimatedState())
+        composeTestRule.onNodeWithText("Pace breakdown").assertDoesNotExist()
+
+        composeTestRule.onNodeWithText("You'll catch up by", substring = true).performClick()
+
+        composeTestRule.onNodeWithText("Pace breakdown").assertExists()
+        composeTestRule.onNodeWithText("Days logged so far").assertExists()
+        composeTestRule.onNodeWithText("Average prayers per day").assertExists()
+        composeTestRule.onNodeWithText("Remaining prayers").assertExists()
+        composeTestRule.onNodeWithText("3287").assertExists()
+        composeTestRule.onNodeWithText("Confidence").assertExists()
+
+        composeTestRule.onNodeWithText("Close").performClick()
+        composeTestRule.onNodeWithText("Pace breakdown").assertDoesNotExist()
+    }
+
+    @Test
+    fun theBreakdown_explainsHowTheDateWasWorkedOut() {
+        setContent(estimatedState(estimate(daysRemaining = 45, pace = 8.5f)))
+
+        composeTestRule.onNodeWithText("You'll catch up by", substring = true).performClick()
+
+        composeTestRule.onNodeWithText("At 8.5 prayers a day", substring = true).assertExists()
+        composeTestRule.onNodeWithText("3287 remaining prayers", substring = true).assertExists()
+    }
+
+    @Test
+    fun theDateOnScreenUpdatesWhenTheEstimateChanges() {
+        val state = mutableStateOf(estimatedState(estimate(daysRemaining = 5000, estimatedDate = LocalDate.of(2099, 12, 15))))
+        composeTestRule.setContent {
+            QazaTrackerTheme { DashboardContent(uiState = state.value) }
+        }
+        composeTestRule.onNodeWithText("December 15, 2099", substring = true).assertExists()
+
+        // Logging prayers raises the pace, which pulls the finish date in.
+        state.value = estimatedState(estimate(daysRemaining = 4000, estimatedDate = LocalDate.of(2099, 6, 1)))
+
+        composeTestRule.onNodeWithText("June 1, 2099", substring = true).assertExists()
+        composeTestRule.onNodeWithText("December 15, 2099", substring = true).assertDoesNotExist()
     }
 
     // ---- Quick single-tap log and batch entry point ----

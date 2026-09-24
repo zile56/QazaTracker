@@ -28,9 +28,11 @@ the original screen list:
   toggle).
 - ✅ **Baseline summary** — calculated totals per prayer type, editable
   before confirming.
-- ✅ **Dashboard** — total remaining count, per-prayer progress rows,
-  pace projection, quick single-tap logging, manual adjustments, and a
-  brief celebration card when the last missed prayer of a type is completed.
+- ✅ **Dashboard** — total remaining count, per-prayer progress rows, an
+  estimated completion date (colour-coded by how far off it is, with a
+  timeline and a tap-through pace breakdown), quick single-tap logging,
+  manual adjustments, and a brief celebration card when the last missed
+  prayer of a type is completed.
 - ✅ **Batch logging** — multi-day, multi-prayer-type logging in one
   action.
 - ✅ **History/ledger** — a merged, batch-collapsing timeline of

@@ -1,5 +1,6 @@
 package com.zilehasnain.qazatracker.ui.statistics
 
+import com.zilehasnain.qazatracker.ui.common.formatPercent
 import java.time.YearMonth
 import org.junit.Assert.assertEquals
 import org.junit.Test

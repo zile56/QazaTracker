@@ -44,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -56,7 +57,6 @@ import com.zilehasnain.qazatracker.domain.model.StreakData
 import com.zilehasnain.qazatracker.ui.common.StatisticsIcon
 import com.zilehasnain.qazatracker.ui.common.displayName
 import com.zilehasnain.qazatracker.ui.theme.QazaShapes
-import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 
 @Composable
@@ -189,7 +189,7 @@ fun DashboardContent(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(Modifier.height(14.dp))
-                ProjectionBadge(uiState.projection)
+                ProjectionSection(uiState.projection)
                 Spacer(Modifier.height(14.dp))
                 OutlinedButton(onClick = onLogBatchClicked, shape = QazaShapes.pillShape) {
                     Icon(Icons.Default.DateRange, contentDescription = null, modifier = Modifier.size(16.dp))
@@ -266,9 +266,20 @@ private fun StreakSummary(streak: StreakData) {
     }
 }
 
+/** A real estimate gets the full card; the two states without one keep a quiet one-line pill. */
 @Composable
-private fun ProjectionBadge(projection: CompletionProjection) {
-    val icon = if (projection is CompletionProjection.AlreadyCaughtUp) Icons.Default.Check else Icons.Default.DateRange
+private fun ProjectionSection(projection: CompletionProjection) {
+    when (projection) {
+        is CompletionProjection.Estimated -> CompletionEstimateCard(projection.estimate)
+        CompletionProjection.AlreadyCaughtUp ->
+            ProjectionBadge(icon = Icons.Default.Check, text = "You are fully caught up")
+        CompletionProjection.InsufficientData ->
+            ProjectionBadge(icon = Icons.Default.DateRange, text = "Log a few prayers to see your pace")
+    }
+}
+
+@Composable
+private fun ProjectionBadge(icon: ImageVector, text: String) {
     Surface(
         shape = QazaShapes.pillShape,
         color = MaterialTheme.colorScheme.secondaryContainer
@@ -285,7 +296,7 @@ private fun ProjectionBadge(projection: CompletionProjection) {
                 modifier = Modifier.size(14.dp)
             )
             Text(
-                text = projection.displayText(),
+                text = text,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSecondaryContainer
             )
@@ -435,17 +446,4 @@ private fun AdjustmentDialog(
             }
         }
     )
-}
-
-private fun CompletionProjection.displayText(): String = when (this) {
-    CompletionProjection.AlreadyCaughtUp -> "You are fully caught up"
-    CompletionProjection.InsufficientData -> "Log a few prayers to see your pace"
-    is CompletionProjection.Estimated -> {
-        val months = (daysRemaining / 30.0).roundToInt()
-        if (months < 1) {
-            "At your pace, cleared in under a month"
-        } else {
-            "At your pace, cleared in ~$months month${if (months == 1) "" else "s"}"
-        }
-    }
 }

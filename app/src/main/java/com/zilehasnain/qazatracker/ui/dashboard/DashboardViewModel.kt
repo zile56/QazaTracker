@@ -136,14 +136,13 @@ class DashboardViewModel @Inject constructor(
         }
 
         val totalRemaining = rows.sumOf { it.remaining }
-        val totalCompleted = rows.sumOf { it.completed }
 
         val projection = if (startedAt == null) {
             CompletionProjection.InsufficientData
         } else {
             projectCompletionDate(
                 totalRemaining = totalRemaining,
-                totalCompleted = totalCompleted,
+                completions = completions,
                 trackingStartedAt = startedAt.atZone(ZoneId.systemDefault()).toLocalDate()
             )
         }

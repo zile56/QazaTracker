@@ -44,6 +44,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zilehasnain.qazatracker.domain.model.MonthlyStatsData
 import com.zilehasnain.qazatracker.domain.model.PrayerType
 import com.zilehasnain.qazatracker.ui.common.displayName
+import com.zilehasnain.qazatracker.ui.common.formatPercent
 import com.zilehasnain.qazatracker.ui.theme.Neutral600
 import com.zilehasnain.qazatracker.ui.theme.QazaShapes
 import com.zilehasnain.qazatracker.ui.theme.Sage500
@@ -53,7 +54,6 @@ import com.zilehasnain.qazatracker.ui.theme.Terracotta700
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-import kotlin.math.roundToInt
 
 private val CHART_HEIGHT = 140.dp
 
@@ -311,18 +311,6 @@ private fun PrayerType.chartColor(): Color = when (this) {
     PrayerType.ASR -> Terracotta700
     PrayerType.MAGHRIB -> Sage700
     PrayerType.ISHA -> Neutral600
-}
-
-/**
- * Whole percent normally ("51%"), but one decimal below 10% so a real month against a large
- * backlog reads "1.4%" rather than a flat "1%", and "<0.1%" rather than a misleading "0.0%" for
- * a real but tiny share. Always Latin digits, like the rest of the app.
- */
-internal fun formatPercent(rate: Float): String = when {
-    rate <= 0f -> "0%"
-    rate < 0.1f -> "<0.1%"
-    rate < 9.95f -> String.format(Locale.US, "%.1f%%", rate)
-    else -> "${rate.roundToInt()}%"
 }
 
 private val monthTitleFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.getDefault())
