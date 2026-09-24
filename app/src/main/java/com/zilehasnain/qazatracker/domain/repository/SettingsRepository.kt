@@ -8,4 +8,9 @@ interface SettingsRepository {
     fun observeNotificationFrequency(): Flow<NotificationFrequency>
 
     suspend fun setNotificationFrequency(frequency: NotificationFrequency)
+
+    /** False until the first-time tutorial has been dismissed (by finishing or skipping it). */
+    fun observeHasSeenTutorial(): Flow<Boolean>
+
+    suspend fun markTutorialSeen()
 }

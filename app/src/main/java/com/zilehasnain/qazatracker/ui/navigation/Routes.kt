@@ -3,6 +3,7 @@ package com.zilehasnain.qazatracker.ui.navigation
 import com.zilehasnain.qazatracker.domain.model.CalculationMethod
 
 object Routes {
+    const val TUTORIAL = "tutorial"
     const val ONBOARDING = "onboarding"
     const val DASHBOARD = "dashboard"
     const val BATCH_LOGGING = "batchLogging"
@@ -16,4 +17,15 @@ object Routes {
 
     fun baselineSummary(missedDays: Long, method: CalculationMethod): String =
         "$BASELINE_SUMMARY_BASE/$missedDays/${method.name}"
+
+    /**
+     * Someone who already has a baseline goes straight to the dashboard even if the tutorial
+     * flag is unset (e.g. they installed before the tutorial existed) — its "get started"
+     * button leads to onboarding, which would be wrong for them.
+     */
+    fun startDestinationFor(hasBaseline: Boolean, hasSeenTutorial: Boolean): String = when {
+        hasBaseline -> DASHBOARD
+        !hasSeenTutorial -> TUTORIAL
+        else -> ONBOARDING
+    }
 }

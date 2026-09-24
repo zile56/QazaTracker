@@ -20,19 +20,21 @@ import com.zilehasnain.qazatracker.ui.dashboard.DashboardScreen
 import com.zilehasnain.qazatracker.ui.history.HistoryScreen
 import com.zilehasnain.qazatracker.ui.onboarding.OnboardingScreen
 import com.zilehasnain.qazatracker.ui.settings.SettingsScreen
+import com.zilehasnain.qazatracker.ui.tutorial.TutorialScreen
 
 /**
- * Onboarding and baseline summary are first-run-only: once a baseline exists, the graph
- * starts straight at the dashboard, and confirming a baseline clears them from the back
- * stack (see popUpTo below) so back-navigation can't return to them. Re-reaching them
- * later is meant to go through a future reset/re-onboard action, not normal navigation.
+ * Tutorial, onboarding and baseline summary are first-run-only: the tutorial shows once for a
+ * brand-new user and hands off to onboarding; once a baseline exists, the graph starts straight
+ * at the dashboard, and each of these clears itself from the back stack (see popUpTo below) so
+ * back-navigation can't return to it. Re-reaching them later is meant to go through a future
+ * reset/re-onboard action, not normal navigation.
  */
 @Composable
 fun QazaNavHost(modifier: Modifier = Modifier, appViewModel: AppViewModel = hiltViewModel()) {
-    val hasBaseline by appViewModel.hasBaseline.collectAsStateWithLifecycle()
-    val knownHasBaseline = hasBaseline
+    val resolvedStartDestination by appViewModel.startDestination.collectAsStateWithLifecycle()
+    val startDestination = resolvedStartDestination
 
-    if (knownHasBaseline == null) {
+    if (startDestination == null) {
         Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
         return
     }
@@ -41,9 +43,19 @@ fun QazaNavHost(modifier: Modifier = Modifier, appViewModel: AppViewModel = hilt
 
     NavHost(
         navController = navController,
-        startDestination = if (knownHasBaseline) Routes.DASHBOARD else Routes.ONBOARDING,
+        startDestination = startDestination,
         modifier = modifier
     ) {
+        composable(Routes.TUTORIAL) {
+            TutorialScreen(
+                onFinished = {
+                    navController.navigate(Routes.ONBOARDING) {
+                        popUpTo(Routes.TUTORIAL) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable(Routes.ONBOARDING) {
             OnboardingScreen(
                 onBaselineCalculated = { result ->

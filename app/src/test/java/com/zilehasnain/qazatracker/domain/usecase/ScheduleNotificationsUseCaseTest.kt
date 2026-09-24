@@ -2,9 +2,7 @@ package com.zilehasnain.qazatracker.domain.usecase
 
 import com.zilehasnain.qazatracker.domain.model.NotificationFrequency
 import com.zilehasnain.qazatracker.domain.repository.NotificationScheduler
-import com.zilehasnain.qazatracker.domain.repository.SettingsRepository
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.zilehasnain.qazatracker.fakes.FakeSettingsRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -16,14 +14,6 @@ import org.junit.Test
  * needing a real DataStore file or a real WorkManager instance.
  */
 class ScheduleNotificationsUseCaseTest {
-
-    private class FakeSettingsRepository : SettingsRepository {
-        val frequency = MutableStateFlow(NotificationFrequency.WEEKLY)
-        override fun observeNotificationFrequency(): Flow<NotificationFrequency> = frequency
-        override suspend fun setNotificationFrequency(frequency: NotificationFrequency) {
-            this.frequency.value = frequency
-        }
-    }
 
     private class FakeNotificationScheduler : NotificationScheduler {
         val scheduledCalls = mutableListOf<NotificationFrequency>()

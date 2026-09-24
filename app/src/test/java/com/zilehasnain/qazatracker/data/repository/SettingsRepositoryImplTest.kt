@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -69,6 +71,34 @@ class SettingsRepositoryImplTest {
         )
 
         assertEquals(NotificationFrequency.NEVER, reopened.observeNotificationFrequency().first())
+    }
+
+    @Test
+    fun `the tutorial counts as unseen on a fresh install`() = runTest {
+        assertFalse(repository.observeHasSeenTutorial().first())
+    }
+
+    @Test
+    fun `marking the tutorial seen persists it`() = runTest {
+        repository.markTutorialSeen()
+
+        assertTrue(repository.observeHasSeenTutorial().first())
+    }
+
+    @Test
+    fun `marking the tutorial seen twice is harmless and stays seen`() = runTest {
+        repository.markTutorialSeen()
+        repository.markTutorialSeen()
+
+        assertTrue(repository.observeHasSeenTutorial().first())
+    }
+
+    @Test
+    fun `the tutorial flag doesn't disturb the notification frequency`() = runTest {
+        repository.setNotificationFrequency(NotificationFrequency.DAILY)
+        repository.markTutorialSeen()
+
+        assertEquals(NotificationFrequency.DAILY, repository.observeNotificationFrequency().first())
     }
 
     @Test
