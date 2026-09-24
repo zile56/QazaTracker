@@ -1,0 +1,7 @@
+package com.zilehasnain.qazatracker.domain.model
+
+data class RemainingPrayerCount(
+    val prayerType: PrayerType,
+    val remaining: Int,
+    val completed: Int
+)

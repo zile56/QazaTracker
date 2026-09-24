@@ -3,7 +3,7 @@
 ## Package Structure
 
 ```
-com.example.qazatracker/
+com.zilehasnain.qazatracker/
 ├── MainActivity.kt                    # App entry point, Compose root
 ├── QazaTrackerApp.kt                  # @HiltAndroidApplication
 ├── QazaNavHost.kt                     # All screen routes & navigation

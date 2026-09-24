@@ -1,0 +1,38 @@
+package com.zilehasnain.qazatracker.ui.dashboard
+
+import com.zilehasnain.qazatracker.domain.model.CompletionProjection
+import com.zilehasnain.qazatracker.domain.model.PrayerType
+
+data class DashboardUiState(
+    val rows: List<PrayerRowUiState> = PrayerType.entries.map { PrayerRowUiState(it, completed = 0, remaining = 0) },
+    val projection: CompletionProjection = CompletionProjection.InsufficientData,
+    val adjustmentDialog: AdjustmentDialogState? = null
+) {
+    val totalRemaining: Int get() = rows.sumOf { it.remaining }
+}
+
+data class PrayerRowUiState(
+    val prayerType: PrayerType,
+    val completed: Int,
+    val remaining: Int
+) {
+    /** Fraction complete, for the progress bar. No missed prayers at all reads as fully done. */
+    val progressFraction: Float
+        get() {
+            val total = completed + remaining
+            return if (total <= 0) 1f else (completed.toFloat() / total).coerceIn(0f, 1f)
+        }
+}
+
+data class AdjustmentDialogState(
+    val prayerType: PrayerType,
+    val isNegative: Boolean = false,
+    val magnitudeInput: String = "",
+    val note: String = ""
+) {
+    private val magnitude: Int? get() = magnitudeInput.toIntOrNull()
+    val delta: Int? get() = magnitude?.let { if (isNegative) -it else it }
+
+    /** Mirrors ApplyAdjustmentUseCase's own non-zero requirement. */
+    val canConfirm: Boolean get() = delta != null && delta != 0
+}
