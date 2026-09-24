@@ -6,6 +6,7 @@ import androidx.work.Configuration
 import com.zilehasnain.qazatracker.domain.repository.NotificationScheduler
 import com.zilehasnain.qazatracker.domain.repository.SettingsRepository
 import com.zilehasnain.qazatracker.notification.NotificationChannels
+import com.zilehasnain.qazatracker.ui.widget.WidgetUpdater
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -20,6 +21,7 @@ class QazaTrackerApp : Application(), Configuration.Provider {
     @Inject lateinit var hiltWorkerFactory: HiltWorkerFactory
     @Inject lateinit var settingsRepository: SettingsRepository
     @Inject lateinit var notificationScheduler: NotificationScheduler
+    @Inject lateinit var widgetUpdater: WidgetUpdater
 
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
@@ -37,5 +39,10 @@ class QazaTrackerApp : Application(), Configuration.Provider {
             val frequency = settingsRepository.observeNotificationFrequency().first()
             notificationScheduler.schedule(frequency)
         }
+
+        // Any change to the remaining counts (Dashboard +1, batch logging, adjustments, a new
+        // baseline) re-renders the home-screen widget while the app process is alive. Also
+        // renders once on every start, so the widget can't stay stale across an app update.
+        widgetUpdater.observeChanges(applicationScope)
     }
 }

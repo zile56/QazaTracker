@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Compact 3x3 home-screen widget: one row per prayer type with what's left and a +1 button.
+     Rows share the height equally (weight), so the widget stays readable if it's resized.
+     Prayer names are static here; the provider only sets the counts and click handlers. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <LinearLayout
+        android:id="@+id/widget_rows"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/widget_row_fajr"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:layout_weight="1"
+            android:background="@drawable/widget_row_terracotta"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="4dp">
+
+            <TextView
+                android:id="@+id/widget_name_fajr"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:text="@string/widget_prayer_fajr"
+                android:textColor="@color/widget_text"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/widget_count_fajr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:maxLines="1"
+                android:text="@string/widget_count_placeholder"
+                android:textColor="@color/widget_text_secondary"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/widget_add_fajr"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:background="@drawable/widget_button_background"
+                android:contentDescription="@string/widget_log_fajr"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:text="+"
+                android:textColor="@color/widget_on_button"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/widget_row_dhuhr"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:layout_weight="1"
+            android:background="@drawable/widget_row_sage"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="4dp">
+
+            <TextView
+                android:id="@+id/widget_name_dhuhr"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:text="@string/widget_prayer_dhuhr"
+                android:textColor="@color/widget_text"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/widget_count_dhuhr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:maxLines="1"
+                android:text="@string/widget_count_placeholder"
+                android:textColor="@color/widget_text_secondary"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/widget_add_dhuhr"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:background="@drawable/widget_button_background"
+                android:contentDescription="@string/widget_log_dhuhr"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:text="+"
+                android:textColor="@color/widget_on_button"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/widget_row_asr"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:layout_weight="1"
+            android:background="@drawable/widget_row_terracotta"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="4dp">
+
+            <TextView
+                android:id="@+id/widget_name_asr"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:text="@string/widget_prayer_asr"
+                android:textColor="@color/widget_text"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/widget_count_asr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:maxLines="1"
+                android:text="@string/widget_count_placeholder"
+                android:textColor="@color/widget_text_secondary"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/widget_add_asr"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:background="@drawable/widget_button_background"
+                android:contentDescription="@string/widget_log_asr"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:text="+"
+                android:textColor="@color/widget_on_button"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/widget_row_maghrib"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:layout_weight="1"
+            android:background="@drawable/widget_row_sage"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="4dp">
+
+            <TextView
+                android:id="@+id/widget_name_maghrib"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:text="@string/widget_prayer_maghrib"
+                android:textColor="@color/widget_text"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/widget_count_maghrib"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:maxLines="1"
+                android:text="@string/widget_count_placeholder"
+                android:textColor="@color/widget_text_secondary"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/widget_add_maghrib"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:background="@drawable/widget_button_background"
+                android:contentDescription="@string/widget_log_maghrib"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:text="+"
+                android:textColor="@color/widget_on_button"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/widget_row_isha"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:layout_weight="1"
+            android:background="@drawable/widget_row_terracotta"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="4dp">
+
+            <TextView
+                android:id="@+id/widget_name_isha"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:text="@string/widget_prayer_isha"
+                android:textColor="@color/widget_text"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/widget_count_isha"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:maxLines="1"
+                android:text="@string/widget_count_placeholder"
+                android:textColor="@color/widget_text_secondary"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/widget_add_isha"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:background="@drawable/widget_button_background"
+                android:contentDescription="@string/widget_log_isha"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:text="+"
+                android:textColor="@color/widget_on_button"
+                android:textSize="18sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/widget_empty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center"
+        android:padding="12dp"
+        android:text="@string/widget_empty"
+        android:textColor="@color/widget_text"
+        android:textSize="14sp"
+        android:visibility="gone" />
+</LinearLayout>

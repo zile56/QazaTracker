@@ -41,6 +41,10 @@ the original screen list:
   completions for each prayer type as a bar chart and progress rows, with
   previous/next month navigation. Reachable from the chart icon on the
   Dashboard.
+- ✅ **Home-screen widget** *(beyond the original screen list)* — a compact
+  3x3 widget with all five prayer types, what's left of each, and a +1
+  button per row; it logs through the same use case as the app and stays in
+  sync in both directions via the shared database.
 - ✅ **Settings** *(beyond the original screen list)* — notification
   frequency (DataStore Preferences-backed), a full-data JSON export,
   app version, and an About block. Reachable via a gear icon next to

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home-screen widget colours, taken from the app palette (ui/theme/Color.kt): cream ground,
+     terracotta and sage row tints, terracotta button. RemoteViews can't use Compose, so the
+     palette is repeated here; values-night/ carries the dark equivalents. -->
+<resources>
+    <color name="widget_background">#F5EAD8</color>
+    <color name="widget_row_terracotta">#FFF2EB</color>
+    <color name="widget_row_sage">#F0FAE1</color>
+    <color name="widget_text">#201E1D</color>
+    <color name="widget_text_secondary">#645C50</color>
+    <color name="widget_button">#C67139</color>
+    <color name="widget_on_button">#F5EAD8</color>
+</resources>

@@ -1,3 +1,19 @@
 <resources>
     <string name="app_name">Qaza Tracker</string>
+
+    <!-- Home-screen widget -->
+    <string name="widget_label">Qaza Tracker</string>
+    <string name="widget_description">Log a missed prayer with one tap and see how many are left.</string>
+    <string name="widget_count_placeholder">…</string>
+    <string name="widget_empty">Open Qaza Tracker to set up your missed prayers.</string>
+    <string name="widget_prayer_fajr">Fajr</string>
+    <string name="widget_prayer_dhuhr">Dhuhr</string>
+    <string name="widget_prayer_asr">Asr</string>
+    <string name="widget_prayer_maghrib">Maghrib</string>
+    <string name="widget_prayer_isha">Isha</string>
+    <string name="widget_log_fajr">Log one Fajr</string>
+    <string name="widget_log_dhuhr">Log one Dhuhr</string>
+    <string name="widget_log_asr">Log one Asr</string>
+    <string name="widget_log_maghrib">Log one Maghrib</string>
+    <string name="widget_log_isha">Log one Isha</string>
 </resources>

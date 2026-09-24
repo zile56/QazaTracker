@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="widget_background">#2E2B25</color>
+    <color name="widget_row_terracotta">#402310</color>
+    <color name="widget_row_sage">#272E1B</color>
+    <color name="widget_text">#F9F4ED</color>
+    <color name="widget_text_secondary">#DCD3C4</color>
+    <color name="widget_button">#D67F48</color>
+    <color name="widget_on_button">#2E2B25</color>
+</resources>
