@@ -43,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,6 +51,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zilehasnain.qazatracker.domain.model.CompletionProjection
 import com.zilehasnain.qazatracker.domain.model.PrayerType
+import com.zilehasnain.qazatracker.domain.model.StreakData
 import com.zilehasnain.qazatracker.ui.common.displayName
 import com.zilehasnain.qazatracker.ui.theme.QazaShapes
 import kotlin.math.roundToInt
@@ -138,6 +140,8 @@ fun DashboardContent(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                StreakSummary(uiState.streak)
+                Spacer(Modifier.height(20.dp))
                 Text(
                     text = uiState.totalRemaining.toString(),
                     style = MaterialTheme.typography.headlineLarge.copy(fontSize = 56.sp, lineHeight = 58.sp)
@@ -192,6 +196,35 @@ fun DashboardContent(
                 onNoteChanged = onAdjustmentNoteChanged,
                 onConfirm = onConfirmAdjustment,
                 onDismiss = onDismissAdjustmentDialog
+            )
+        }
+    }
+}
+
+/**
+ * Deliberately gentle: a broken streak just reads as "start a new one", never as a failure.
+ * The fire emoji is written as a surrogate-pair escape so the source file's encoding can't
+ * mangle it.
+ */
+@Composable
+private fun StreakSummary(streak: StreakData) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = if (streak.currentStreak > 0) {
+                "${streak.currentStreak}-day streak! 🔥"
+            } else {
+                "Log a prayer today to start a streak"
+            },
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.primary
+        )
+        if (streak.longestStreak > 0) {
+            Spacer(Modifier.height(2.dp))
+            Text(
+                text = "Longest streak: ${streak.longestStreak} ${if (streak.longestStreak == 1) "day" else "days"}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

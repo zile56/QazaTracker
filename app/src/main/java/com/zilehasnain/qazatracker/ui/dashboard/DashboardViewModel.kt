@@ -3,15 +3,18 @@ package com.zilehasnain.qazatracker.ui.dashboard
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zilehasnain.qazatracker.domain.model.AdjustmentReason
+import com.zilehasnain.qazatracker.domain.model.CompletionEntry
 import com.zilehasnain.qazatracker.domain.model.CompletionProjection
 import com.zilehasnain.qazatracker.domain.model.PrayerType
 import com.zilehasnain.qazatracker.domain.model.RemainingPrayerCount
 import com.zilehasnain.qazatracker.domain.repository.QazaRepository
 import com.zilehasnain.qazatracker.domain.usecase.ApplyAdjustmentUseCase
+import com.zilehasnain.qazatracker.domain.usecase.CalculateStreakUseCase
 import com.zilehasnain.qazatracker.domain.usecase.LogCompletionUseCase
 import com.zilehasnain.qazatracker.domain.usecase.ProjectCompletionDateUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,6 +28,7 @@ import kotlinx.coroutines.launch
 class DashboardViewModel @Inject constructor(
     repository: QazaRepository,
     private val projectCompletionDate: ProjectCompletionDateUseCase,
+    private val calculateStreak: CalculateStreakUseCase,
     private val logCompletion: LogCompletionUseCase,
     private val applyAdjustment: ApplyAdjustmentUseCase
 ) : ViewModel() {
@@ -83,20 +87,24 @@ class DashboardViewModel @Inject constructor(
         viewModelScope.launch {
             combine(
                 repository.observeRemainingCounts(),
-                repository.observeBaselineStartedAt()
-            ) { counts, startedAt -> counts to startedAt }
-                .collect { (counts, startedAt) ->
-                    val computed = buildUiState(counts, startedAt)
+                repository.observeBaselineStartedAt(),
+                repository.observeCompletionLogs()
+            ) { counts, startedAt, completions -> Triple(counts, startedAt, completions) }
+                .collect { (counts, startedAt, completions) ->
+                    val computed = buildUiState(counts, startedAt, completions)
                     // Only replace the repository-derived fields — a re-emission (e.g. from
                     // another screen's write) must not clobber an in-progress dialog.
-                    _uiState.update { it.copy(rows = computed.rows, projection = computed.projection) }
+                    _uiState.update {
+                        it.copy(rows = computed.rows, projection = computed.projection, streak = computed.streak)
+                    }
                 }
         }
     }
 
     private fun buildUiState(
         counts: List<RemainingPrayerCount>,
-        startedAt: Instant?
+        startedAt: Instant?,
+        completions: List<CompletionEntry>
     ): DashboardUiState {
         val byType = counts.associateBy { it.prayerType }
         val rows = PrayerType.entries.map { type ->
@@ -121,6 +129,8 @@ class DashboardViewModel @Inject constructor(
             )
         }
 
-        return DashboardUiState(rows = rows, projection = projection)
+        val streak = calculateStreak(completions, LocalDate.now(), ZoneId.systemDefault())
+
+        return DashboardUiState(rows = rows, projection = projection, streak = streak)
     }
 }

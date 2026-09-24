@@ -5,8 +5,10 @@ systematically complete missed (Qaza) prayers.
 
 This is a **debt-clearing app, not a daily habit checklist** — the core
 interaction is working down a large backlog over months or years, not
-checking off "today's tasks." There's deliberately no calendar strip, no
-streaks, and no daily-checklist UI.
+checking off "today's tasks." There's deliberately no calendar strip and no
+daily-checklist UI. The dashboard shows one small consecutive-days streak,
+derived from the completion log and worded gently (a lapse reads as "log a
+prayer today to start a streak", never as a failure).
 
 ## Status
 

@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.zilehasnain.qazatracker.domain.model.CompletionProjection
 import com.zilehasnain.qazatracker.domain.model.PrayerType
+import com.zilehasnain.qazatracker.domain.model.StreakData
 import com.zilehasnain.qazatracker.ui.theme.QazaTrackerTheme
 import java.time.LocalDate
 import org.junit.Assert.assertTrue
@@ -214,6 +215,49 @@ class DashboardScreenTest {
         composeTestRule.onNodeWithContentDescription("Settings").performClick()
 
         assertTrue(clicked)
+    }
+
+    // ---- Streak display ----
+
+    private fun streakState(current: Int, longest: Int) = DashboardUiState(
+        rows = rows(completedEach = 0, remainingEach = 10),
+        streak = StreakData(
+            currentStreak = current,
+            longestStreak = longest,
+            lastLoggedDate = LocalDate.now()
+        )
+    )
+
+    @Test
+    fun streak_showsCurrentAndLongest_whenActive() {
+        setContent(streakState(current = 15, longest = 47))
+
+        composeTestRule.onNodeWithText("15-day streak! 🔥").assertExists()
+        composeTestRule.onNodeWithText("Longest streak: 47 days").assertExists()
+    }
+
+    @Test
+    fun streak_ofOne_usesSingularLongestDay() {
+        setContent(streakState(current = 1, longest = 1))
+
+        composeTestRule.onNodeWithText("1-day streak! 🔥").assertExists()
+        composeTestRule.onNodeWithText("Longest streak: 1 day").assertExists()
+    }
+
+    @Test
+    fun brokenStreak_invitesANewOne_andStillShowsTheRecord() {
+        setContent(streakState(current = 0, longest = 12))
+
+        composeTestRule.onNodeWithText("Log a prayer today to start a streak").assertExists()
+        composeTestRule.onNodeWithText("Longest streak: 12 days").assertExists()
+    }
+
+    @Test
+    fun noHistoryYet_showsOnlyTheInvitation() {
+        setContent(DashboardUiState(rows = rows(completedEach = 0, remainingEach = 10)))
+
+        composeTestRule.onNodeWithText("Log a prayer today to start a streak").assertExists()
+        composeTestRule.onNodeWithText("Longest streak: 0 days").assertDoesNotExist()
     }
 
     // ---- Manual adjustment entry point and dialog validation ----
