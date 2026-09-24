@@ -1,6 +1,7 @@
 package com.zilehasnain.qazatracker.ui.dashboard
 
 import com.zilehasnain.qazatracker.domain.model.CompletionProjection
+import com.zilehasnain.qazatracker.domain.model.MilestoneData
 import com.zilehasnain.qazatracker.domain.model.PrayerType
 import com.zilehasnain.qazatracker.domain.model.StreakData
 
@@ -8,6 +9,8 @@ data class DashboardUiState(
     val rows: List<PrayerRowUiState> = PrayerType.entries.map { PrayerRowUiState(it, completed = 0, remaining = 0) },
     val projection: CompletionProjection = CompletionProjection.InsufficientData,
     val streak: StreakData = StreakData.None,
+    /** Milestones achieved this session and not yet dismissed; normally empty. */
+    val celebrations: List<MilestoneData> = emptyList(),
     val adjustmentDialog: AdjustmentDialogState? = null
 ) {
     val totalRemaining: Int get() = rows.sumOf { it.remaining }

@@ -37,6 +37,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,6 +56,7 @@ import com.zilehasnain.qazatracker.domain.model.StreakData
 import com.zilehasnain.qazatracker.ui.common.displayName
 import com.zilehasnain.qazatracker.ui.theme.QazaShapes
 import kotlin.math.roundToInt
+import kotlinx.coroutines.delay
 
 @Composable
 fun DashboardScreen(
@@ -77,9 +79,13 @@ fun DashboardScreen(
         onAdjustmentNoteChanged = viewModel::onAdjustmentNoteChanged,
         onConfirmAdjustment = viewModel::onConfirmAdjustment,
         onDismissAdjustmentDialog = viewModel::onDismissAdjustmentDialog,
+        onMilestoneDismissed = viewModel::onMilestoneDismissed,
         modifier = modifier
     )
 }
+
+/** How long a milestone card stays up if the user doesn't tap it away. */
+private const val MILESTONE_AUTO_DISMISS_MILLIS = 5_000L
 
 @Composable
 fun DashboardContent(
@@ -94,8 +100,17 @@ fun DashboardContent(
     onAdjustmentNoteChanged: (String) -> Unit = {},
     onConfirmAdjustment: () -> Unit = {},
     onDismissAdjustmentDialog: () -> Unit = {},
+    onMilestoneDismissed: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    // Restarts whenever a different set of celebrations arrives, so each gets its full 5 seconds.
+    LaunchedEffect(uiState.celebrations) {
+        if (uiState.celebrations.isNotEmpty()) {
+            delay(MILESTONE_AUTO_DISMISS_MILLIS)
+            onMilestoneDismissed()
+        }
+    }
+
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Column(
             modifier = Modifier
@@ -135,6 +150,15 @@ fun DashboardContent(
             }
 
             Spacer(Modifier.height(18.dp))
+
+            if (uiState.celebrations.isNotEmpty()) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    uiState.celebrations.forEach { milestone ->
+                        MilestoneCard(milestone = milestone, onDismiss = onMilestoneDismissed)
+                    }
+                }
+                Spacer(Modifier.height(16.dp))
+            }
 
             Column(
                 modifier = Modifier.fillMaxWidth(),

@@ -4,6 +4,7 @@ import com.zilehasnain.qazatracker.domain.model.AdjustmentEntry
 import com.zilehasnain.qazatracker.domain.model.AdjustmentReason
 import com.zilehasnain.qazatracker.domain.model.CalculationMethod
 import com.zilehasnain.qazatracker.domain.model.CompletionEntry
+import com.zilehasnain.qazatracker.domain.model.MilestoneEntry
 import com.zilehasnain.qazatracker.domain.model.PrayerType
 import com.zilehasnain.qazatracker.domain.model.RemainingPrayerCount
 import java.time.Instant
@@ -44,4 +45,9 @@ interface QazaRepository {
 
     /** Raw adjustment log rows, most recent first. */
     fun observeAdjustments(): Flow<List<AdjustmentEntry>>
+
+    suspend fun recordMilestone(entry: MilestoneEntry)
+
+    /** Completed-all-prayers milestones, most recent first. */
+    fun observeMilestones(): Flow<List<MilestoneEntry>>
 }

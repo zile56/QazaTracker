@@ -3,14 +3,17 @@ package com.zilehasnain.qazatracker.data.repository
 import com.zilehasnain.qazatracker.data.local.dao.AdjustmentLogDao
 import com.zilehasnain.qazatracker.data.local.dao.BaselineSnapshotDao
 import com.zilehasnain.qazatracker.data.local.dao.CompletionLogDao
+import com.zilehasnain.qazatracker.data.local.dao.MilestoneDao
 import com.zilehasnain.qazatracker.data.local.dao.PrayerLedgerDao
 import com.zilehasnain.qazatracker.data.local.entity.AdjustmentLog
 import com.zilehasnain.qazatracker.data.local.entity.BaselineSnapshot
 import com.zilehasnain.qazatracker.data.local.entity.CompletionLog
+import com.zilehasnain.qazatracker.data.local.entity.MilestoneEntity
 import com.zilehasnain.qazatracker.domain.model.AdjustmentEntry
 import com.zilehasnain.qazatracker.domain.model.AdjustmentReason
 import com.zilehasnain.qazatracker.domain.model.CalculationMethod
 import com.zilehasnain.qazatracker.domain.model.CompletionEntry
+import com.zilehasnain.qazatracker.domain.model.MilestoneEntry
 import com.zilehasnain.qazatracker.domain.model.PrayerType
 import com.zilehasnain.qazatracker.domain.model.RemainingPrayerCount
 import com.zilehasnain.qazatracker.domain.repository.QazaRepository
@@ -23,7 +26,8 @@ class QazaRepositoryImpl @Inject constructor(
     private val baselineSnapshotDao: BaselineSnapshotDao,
     private val adjustmentLogDao: AdjustmentLogDao,
     private val completionLogDao: CompletionLogDao,
-    private val prayerLedgerDao: PrayerLedgerDao
+    private val prayerLedgerDao: PrayerLedgerDao,
+    private val milestoneDao: MilestoneDao
 ) : QazaRepository {
 
     override suspend fun setBaseline(
@@ -92,6 +96,15 @@ class QazaRepositoryImpl @Inject constructor(
     override fun observeAdjustments(): Flow<List<AdjustmentEntry>> =
         adjustmentLogDao.observeAll().map { rows ->
             rows.map { AdjustmentEntry(it.prayerType, it.delta, it.reason, it.note, it.timestamp) }
+        }
+
+    override suspend fun recordMilestone(entry: MilestoneEntry) {
+        milestoneDao.insertMilestone(MilestoneEntity(prayerType = entry.prayerType, achievedAt = entry.achievedAt))
+    }
+
+    override fun observeMilestones(): Flow<List<MilestoneEntry>> =
+        milestoneDao.getMilestones().map { rows ->
+            rows.map { MilestoneEntry(it.prayerType, it.achievedAt) }
         }
 
     private fun CompletionEntry.toEntity() =

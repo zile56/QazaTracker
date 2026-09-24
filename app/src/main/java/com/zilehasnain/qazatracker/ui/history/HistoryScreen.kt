@@ -136,6 +136,7 @@ private fun HistoryEntry.timelineKey(): String = when (this) {
     is HistoryEntry.SingleCompletion -> "single-$prayerType-$timestamp"
     is HistoryEntry.BatchCompletion -> "batch-$batchId"
     is HistoryEntry.Adjustment -> "adjustment-$prayerType-$timestamp-$delta"
+    is HistoryEntry.Milestone -> "milestone-$prayerType-$timestamp"
 }
 
 private fun HistoryEntry.title(): String = when (this) {
@@ -155,6 +156,8 @@ private fun HistoryEntry.title(): String = when (this) {
         val sign = if (delta > 0) "+" else ""
         "${prayerType.displayName()} adjusted $sign$delta"
     }
+
+    is HistoryEntry.Milestone -> "All ${prayerType.displayName()} prayers completed 🎉"
 }
 
 @Composable
@@ -175,6 +178,12 @@ private fun HistoryEntry.tagStyle(): Triple<String, Color, Color> = when (this) 
         reason.displayName(),
         MaterialTheme.colorScheme.surfaceVariant,
         MaterialTheme.colorScheme.onSurfaceVariant
+    )
+
+    is HistoryEntry.Milestone -> Triple(
+        "Milestone",
+        MaterialTheme.colorScheme.primary,
+        MaterialTheme.colorScheme.onPrimary
     )
 }
 

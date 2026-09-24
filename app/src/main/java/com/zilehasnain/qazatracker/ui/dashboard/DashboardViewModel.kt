@@ -11,6 +11,7 @@ import com.zilehasnain.qazatracker.domain.repository.QazaRepository
 import com.zilehasnain.qazatracker.domain.usecase.ApplyAdjustmentUseCase
 import com.zilehasnain.qazatracker.domain.usecase.CalculateStreakUseCase
 import com.zilehasnain.qazatracker.domain.usecase.LogCompletionUseCase
+import com.zilehasnain.qazatracker.domain.usecase.ObserveMilestonesUseCase
 import com.zilehasnain.qazatracker.domain.usecase.ProjectCompletionDateUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
@@ -29,6 +30,7 @@ class DashboardViewModel @Inject constructor(
     repository: QazaRepository,
     private val projectCompletionDate: ProjectCompletionDateUseCase,
     private val calculateStreak: CalculateStreakUseCase,
+    observeMilestones: ObserveMilestonesUseCase,
     private val logCompletion: LogCompletionUseCase,
     private val applyAdjustment: ApplyAdjustmentUseCase
 ) : ViewModel() {
@@ -42,7 +44,14 @@ class DashboardViewModel @Inject constructor(
      * updates the same way it does for any other write to the ledger tables.
      */
     fun onQuickLog(prayerType: PrayerType) {
+        // Logging anything clears a celebration that's still showing; if this very log completes
+        // a type, the milestone flow below then raises the new one.
+        _uiState.update { it.copy(celebrations = emptyList()) }
         viewModelScope.launch { logCompletion(prayerType) }
+    }
+
+    fun onMilestoneDismissed() {
+        _uiState.update { it.copy(celebrations = emptyList()) }
     }
 
     fun onAdjustClicked(prayerType: PrayerType) {
@@ -83,7 +92,17 @@ class DashboardViewModel @Inject constructor(
         }
     }
 
+    private val milestoneTracker = MilestoneCelebrationTracker()
+
     init {
+        viewModelScope.launch {
+            observeMilestones().collect { milestones ->
+                val fresh = milestoneTracker.newCelebrations(milestones)
+                if (fresh.isNotEmpty()) {
+                    _uiState.update { it.copy(celebrations = fresh) }
+                }
+            }
+        }
         viewModelScope.launch {
             combine(
                 repository.observeRemainingCounts(),

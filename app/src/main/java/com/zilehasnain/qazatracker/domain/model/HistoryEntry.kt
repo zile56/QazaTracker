@@ -31,4 +31,10 @@ sealed interface HistoryEntry {
         val note: String?,
         override val timestamp: Instant
     ) : HistoryEntry
+
+    /** The moment every missed prayer of [prayerType] had been made up. */
+    data class Milestone(
+        val prayerType: PrayerType,
+        override val timestamp: Instant
+    ) : HistoryEntry
 }

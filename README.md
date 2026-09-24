@@ -29,11 +29,12 @@ the original screen list:
 - ✅ **Baseline summary** — calculated totals per prayer type, editable
   before confirming.
 - ✅ **Dashboard** — total remaining count, per-prayer progress rows,
-  pace projection, quick single-tap logging, and manual adjustments.
+  pace projection, quick single-tap logging, manual adjustments, and a
+  brief celebration card when the last missed prayer of a type is completed.
 - ✅ **Batch logging** — multi-day, multi-prayer-type logging in one
   action.
 - ✅ **History/ledger** — a merged, batch-collapsing timeline of
-  completions and adjustments.
+  completions, adjustments and milestones.
 - ✅ **Settings** *(beyond the original screen list)* — notification
   frequency (DataStore Preferences-backed), a full-data JSON export,
   app version, and an About block. Reachable via a gear icon next to
@@ -77,6 +78,12 @@ It's always derived from three append-only tables:
   (reserved for a future release) exemption periods. Each row has a
   signed `delta`, so entries can increase or decrease the count.
 - `CompletionLog` — one row per prayer actually completed.
+
+A fourth append-only table, `prayer_milestones` (added in database v2), records
+each moment every missed prayer of a type was made up. It's a log of something
+that happened, not a counter, and it isn't part of the formula below. The v1→v2
+migration is purely additive and covered by a test that upgrades a real v1
+database and checks nothing was lost.
 
 The remaining count per prayer type is always computed as:
 

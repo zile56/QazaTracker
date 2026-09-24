@@ -7,6 +7,8 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.zilehasnain.qazatracker.domain.model.CompletionProjection
+import com.zilehasnain.qazatracker.domain.model.MilestoneData
+import com.zilehasnain.qazatracker.domain.model.PrayerMilestone
 import com.zilehasnain.qazatracker.domain.model.PrayerType
 import com.zilehasnain.qazatracker.domain.model.StreakData
 import com.zilehasnain.qazatracker.ui.theme.QazaTrackerTheme
@@ -34,7 +36,8 @@ class DashboardScreenTest {
         onAdjustmentMagnitudeChanged: (String) -> Unit = {},
         onAdjustmentNoteChanged: (String) -> Unit = {},
         onConfirmAdjustment: () -> Unit = {},
-        onDismissAdjustmentDialog: () -> Unit = {}
+        onDismissAdjustmentDialog: () -> Unit = {},
+        onMilestoneDismissed: () -> Unit = {}
     ) {
         composeTestRule.setContent {
             QazaTrackerTheme {
@@ -49,7 +52,8 @@ class DashboardScreenTest {
                     onAdjustmentMagnitudeChanged = onAdjustmentMagnitudeChanged,
                     onAdjustmentNoteChanged = onAdjustmentNoteChanged,
                     onConfirmAdjustment = onConfirmAdjustment,
-                    onDismissAdjustmentDialog = onDismissAdjustmentDialog
+                    onDismissAdjustmentDialog = onDismissAdjustmentDialog,
+                    onMilestoneDismissed = onMilestoneDismissed
                 )
             }
         }
@@ -250,6 +254,57 @@ class DashboardScreenTest {
 
         composeTestRule.onNodeWithText("Log a prayer today to start a streak").assertExists()
         composeTestRule.onNodeWithText("Longest streak: 12 days").assertExists()
+    }
+
+    // ---- Milestone celebration ----
+
+    private fun fajrMilestone() = MilestoneData(
+        milestone = PrayerMilestone.COMPLETE_FAJR,
+        milestoneAchievedDate = LocalDate.of(2026, 3, 10),
+        isNewToday = true
+    )
+
+    private fun celebrating() = DashboardUiState(
+        rows = rows(completedEach = 0, remainingEach = 10),
+        celebrations = listOf(fajrMilestone())
+    )
+
+    @Test
+    fun milestoneCard_showsTheCelebrationWithPrayerAndDate() {
+        setContent(celebrating())
+
+        composeTestRule.onNodeWithText("You completed all Fajr prayers! 🎉").assertExists()
+        composeTestRule.onNodeWithText("Achieved", substring = true).assertExists()
+        composeTestRule.onNodeWithText("2026", substring = true).assertExists()
+    }
+
+    @Test
+    fun noCelebration_showsNoMilestoneCard() {
+        setContent(DashboardUiState(rows = rows(completedEach = 0, remainingEach = 10)))
+
+        composeTestRule.onNodeWithText("You completed all", substring = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun tappingTheMilestoneCard_dismissesIt() {
+        var dismissed = 0
+        setContent(celebrating(), onMilestoneDismissed = { dismissed++ })
+
+        composeTestRule.onNodeWithText("You completed all Fajr prayers! 🎉").performClick()
+
+        assertTrue(dismissed == 1)
+    }
+
+    @Test
+    fun milestoneCard_dismissesItselfAfterFiveSeconds_notBefore() {
+        var dismissed = 0
+        setContent(celebrating(), onMilestoneDismissed = { dismissed++ })
+
+        composeTestRule.mainClock.advanceTimeBy(4_500)
+        assertTrue("still showing at 4.5s", dismissed == 0)
+
+        composeTestRule.mainClock.advanceTimeBy(1_000)
+        assertTrue("auto-dismissed once past 5s", dismissed == 1)
     }
 
     @Test

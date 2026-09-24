@@ -3,14 +3,15 @@ package com.zilehasnain.qazatracker.domain.usecase
 import com.zilehasnain.qazatracker.domain.model.AdjustmentEntry
 import com.zilehasnain.qazatracker.domain.model.CompletionEntry
 import com.zilehasnain.qazatracker.domain.model.HistoryEntry
+import com.zilehasnain.qazatracker.domain.model.MilestoneEntry
 import com.zilehasnain.qazatracker.domain.repository.QazaRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 
 /**
- * Merges completions and adjustments into one chronological timeline. Completions that
- * share a batchId (from a single batch-logging submission) collapse into one
+ * Merges completions, adjustments and milestones into one chronological timeline. Completions
+ * that share a batchId (from a single batch-logging submission) collapse into one
  * [HistoryEntry.BatchCompletion] instead of one row per underlying log entry.
  */
 class ObserveHistoryUseCase @Inject constructor(
@@ -19,12 +20,14 @@ class ObserveHistoryUseCase @Inject constructor(
     operator fun invoke(): Flow<List<HistoryEntry>> =
         combine(
             repository.observeCompletionLogs(),
-            repository.observeAdjustments()
-        ) { completions, adjustments -> buildTimeline(completions, adjustments) }
+            repository.observeAdjustments(),
+            repository.observeMilestones()
+        ) { completions, adjustments, milestones -> buildTimeline(completions, adjustments, milestones) }
 
     private fun buildTimeline(
         completions: List<CompletionEntry>,
-        adjustments: List<AdjustmentEntry>
+        adjustments: List<AdjustmentEntry>,
+        milestones: List<MilestoneEntry>
     ): List<HistoryEntry> {
         val (batched, single) = completions.partition { it.batchId != null }
 
@@ -47,6 +50,9 @@ class ObserveHistoryUseCase @Inject constructor(
             HistoryEntry.Adjustment(it.prayerType, it.delta, it.reason, it.note, it.timestamp)
         }
 
-        return (batchEntries + singleEntries + adjustmentEntries).sortedByDescending { it.timestamp }
+        val milestoneEntries = milestones.map { HistoryEntry.Milestone(it.prayerType, it.achievedAt) }
+
+        return (batchEntries + singleEntries + adjustmentEntries + milestoneEntries)
+            .sortedByDescending { it.timestamp }
     }
 }

@@ -43,7 +43,8 @@ class ObserveHistoryUseCaseTest {
             baselineSnapshotDao = db.baselineSnapshotDao(),
             adjustmentLogDao = db.adjustmentLogDao(),
             completionLogDao = db.completionLogDao(),
-            prayerLedgerDao = db.prayerLedgerDao()
+            prayerLedgerDao = db.prayerLedgerDao(),
+            milestoneDao = db.milestoneDao()
         )
 
         logCompletion = LogCompletionUseCase(repository, now = { fixedInstant })
@@ -149,6 +150,31 @@ class ObserveHistoryUseCaseTest {
             ),
             entries.map { it.timestamp }
         )
+    }
+
+    @Test
+    fun `a completed-all-prayers milestone shows up in the timeline after the completion that caused it`() = runTest {
+        seedBaseline() // 100 missed of each type
+
+        // 100 days of Fajr finishes the type; the milestone is stamped a moment after the log.
+        logCompletion.batch(listOf(PrayerType.FAJR), days = 100)
+
+        val timeline = observeHistory().first()
+        val milestone = timeline.filterIsInstance<HistoryEntry.Milestone>().single()
+
+        assertEquals(PrayerType.FAJR, milestone.prayerType)
+        assertEquals(2, timeline.size) // the collapsed batch + the milestone
+    }
+
+    @Test
+    fun `milestones persist and are still in the timeline when it is observed again`() = runTest {
+        seedBaseline()
+        logCompletion.batch(listOf(PrayerType.ISHA), days = 100)
+
+        // A brand-new use case over the same database stands in for "reopen the app".
+        val afterRestart = ObserveHistoryUseCase(repository)().first()
+
+        assertEquals(1, afterRestart.filterIsInstance<HistoryEntry.Milestone>().size)
     }
 
     private suspend fun logCompletionAt(prayerType: PrayerType, timestamp: Instant) {

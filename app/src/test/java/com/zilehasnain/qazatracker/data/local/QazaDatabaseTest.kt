@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.zilehasnain.qazatracker.data.local.entity.AdjustmentLog
 import com.zilehasnain.qazatracker.data.local.entity.BaselineSnapshot
 import com.zilehasnain.qazatracker.data.local.entity.CompletionLog
+import com.zilehasnain.qazatracker.data.local.entity.MilestoneEntity
 import com.zilehasnain.qazatracker.domain.model.AdjustmentReason
 import com.zilehasnain.qazatracker.domain.model.CalculationMethod
 import com.zilehasnain.qazatracker.domain.model.PrayerType
@@ -200,5 +201,48 @@ class QazaDatabaseTest {
         val remaining = db.prayerLedgerDao().observeRemainingCount(PrayerType.MAGHRIB).first()
 
         assertEquals(-3, remaining?.remaining)
+    }
+
+    // ---- prayer_milestones ----
+
+    @Test
+    fun `milestones are returned most recent first`() = runTest {
+        val dao = db.milestoneDao()
+        dao.insertMilestone(MilestoneEntity(prayerType = PrayerType.FAJR, achievedAt = Instant.parse("2026-03-01T00:00:00Z")))
+        dao.insertMilestone(MilestoneEntity(prayerType = PrayerType.ISHA, achievedAt = Instant.parse("2026-03-08T00:00:00Z")))
+        dao.insertMilestone(MilestoneEntity(prayerType = PrayerType.ASR, achievedAt = Instant.parse("2026-03-04T00:00:00Z")))
+
+        assertEquals(
+            listOf(PrayerType.ISHA, PrayerType.ASR, PrayerType.FAJR),
+            dao.getMilestones().first().map { it.prayerType }
+        )
+    }
+
+    @Test
+    fun `the same prayer type can be achieved more than once`() = runTest {
+        val dao = db.milestoneDao()
+        dao.insertMilestone(MilestoneEntity(prayerType = PrayerType.FAJR, achievedAt = Instant.parse("2026-03-01T00:00:00Z")))
+        dao.insertMilestone(MilestoneEntity(prayerType = PrayerType.FAJR, achievedAt = Instant.parse("2026-06-01T00:00:00Z")))
+
+        assertEquals(2, dao.getMilestones().first().size)
+    }
+
+    @Test
+    fun `hasAchievedMilestone is true only for types that have one`() = runTest {
+        val dao = db.milestoneDao()
+        dao.insertMilestone(MilestoneEntity(prayerType = PrayerType.DHUHR, achievedAt = Instant.parse("2026-03-01T00:00:00Z")))
+
+        assertEquals(true, dao.hasAchievedMilestone(PrayerType.DHUHR).first())
+        assertEquals(false, dao.hasAchievedMilestone(PrayerType.MAGHRIB).first())
+    }
+
+    @Test
+    fun `milestones never affect the remaining count`() = runTest {
+        seedBaseline(PrayerType.FAJR, 10)
+        db.milestoneDao().insertMilestone(
+            MilestoneEntity(prayerType = PrayerType.FAJR, achievedAt = Instant.parse("2026-03-01T00:00:00Z"))
+        )
+
+        assertEquals(10, db.prayerLedgerDao().observeRemainingCount(PrayerType.FAJR).first()?.remaining)
     }
 }

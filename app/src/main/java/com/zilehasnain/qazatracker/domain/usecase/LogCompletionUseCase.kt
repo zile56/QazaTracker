@@ -9,15 +9,21 @@ import javax.inject.Inject
 
 class LogCompletionUseCase(
     private val repository: QazaRepository,
-    private val now: () -> Instant = Instant::now
+    private val now: () -> Instant = Instant::now,
+    private val checkMilestone: CheckMilestoneUseCase = CheckMilestoneUseCase(repository, now)
 ) {
     // Dagger can't resolve a `() -> Instant` binding and ignores Kotlin default
     // parameter values, so Hilt is pointed at this delegating constructor instead.
-    @Inject constructor(repository: QazaRepository) : this(repository, Instant::now)
+    @Inject constructor(
+        repository: QazaRepository,
+        checkMilestone: CheckMilestoneUseCase
+    ) : this(repository, Instant::now, checkMilestone)
 
     /** Logs a single completion for one prayer type, right now. */
     suspend operator fun invoke(prayerType: PrayerType) {
+        val before = checkMilestone.remainingByType()
         repository.recordCompletion(CompletionEntry(prayerType = prayerType, timestamp = now()))
+        checkMilestone(before)
     }
 
     /** Logs [days] worth of completions across [prayerTypes], grouped under one batch id. */
@@ -34,6 +40,8 @@ class LogCompletionUseCase(
                 }
             }
         }
+        val before = checkMilestone.remainingByType()
         repository.recordCompletions(entries)
+        checkMilestone(before)
     }
 }

@@ -176,4 +176,16 @@ class HistoryScreenTest {
         composeTestRule.onNodeWithText("Isha adjusted +10").assertExists()
         composeTestRule.onNodeWithText("Recalculation").assertExists()
     }
+
+    @Test
+    fun milestoneEntry_showsTheCompletedAllTitleAndMilestoneTag() {
+        setContent(
+            uiState = HistoryUiState(
+                entries = listOf(HistoryEntry.Milestone(PrayerType.FAJR, fixedInstant))
+            )
+        )
+
+        composeTestRule.onNodeWithText("All Fajr prayers completed 🎉").assertExists()
+        composeTestRule.onNodeWithText("Milestone").assertExists()
+    }
 }

@@ -39,7 +39,8 @@ class LogCompletionUseCaseTest {
             baselineSnapshotDao = db.baselineSnapshotDao(),
             adjustmentLogDao = db.adjustmentLogDao(),
             completionLogDao = db.completionLogDao(),
-            prayerLedgerDao = db.prayerLedgerDao()
+            prayerLedgerDao = db.prayerLedgerDao(),
+            milestoneDao = db.milestoneDao()
         )
 
         logCompletion = LogCompletionUseCase(repository, now = { fixedInstant })
