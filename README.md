@@ -55,6 +55,10 @@ the original screen list:
   calculation method, with alternatives and custom Fajr/Isha angles. Only approximate
   location is requested, and it never leaves the phone. Reachable from the mosque icon on
   the Dashboard and from Settings.
+- ✅ **Daily inspiration** *(beyond the original screen list)* — a verse and a hadith for each day
+  from a built-in offline library (32 of each), with Previous/Next/Random browsing, share and
+  copy, and a Saved tab. The day's pick is derived from the date, so it stays put all day and
+  changes tomorrow; only bookmarks are stored (database v3, additive migration).
 - ✅ **Settings** *(beyond the original screen list)* — notification
   frequency (DataStore Preferences-backed), a full-data JSON export,
   app version, and an About block. Reachable via a gear icon next to

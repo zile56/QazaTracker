@@ -18,3 +18,13 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
         )
     }
 }
+
+/** v2 -> v3: adds saved inspiration items. Purely additive, like v1 -> v2. */
+val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL(
+            "CREATE TABLE IF NOT EXISTS `inspiration_bookmarks` " +
+                "(`itemId` TEXT NOT NULL, `savedAt` INTEGER NOT NULL, PRIMARY KEY(`itemId`))"
+        )
+    }
+}

@@ -12,6 +12,7 @@ object Routes {
     const val STATISTICS = "statistics"
     const val ACHIEVEMENTS = "achievements"
     const val PRAYER_TIMES = "prayerTimes"
+    const val INSPIRATION = "inspiration"
 
     const val MISSED_DAYS_ARG = "missedDays"
     const val METHOD_ARG = "method"

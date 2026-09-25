@@ -19,6 +19,7 @@ import com.zilehasnain.qazatracker.ui.baseline.BaselineSummaryScreen
 import com.zilehasnain.qazatracker.ui.batch.BatchLoggingScreen
 import com.zilehasnain.qazatracker.ui.dashboard.DashboardScreen
 import com.zilehasnain.qazatracker.ui.history.HistoryScreen
+import com.zilehasnain.qazatracker.ui.inspiration.DailyInspirationScreen
 import com.zilehasnain.qazatracker.ui.onboarding.OnboardingScreen
 import com.zilehasnain.qazatracker.ui.prayertimes.PrayerTimesScreen
 import com.zilehasnain.qazatracker.ui.settings.SettingsScreen
@@ -91,7 +92,8 @@ fun QazaNavHost(modifier: Modifier = Modifier, appViewModel: AppViewModel = hilt
                 onSettingsClicked = { navController.navigate(Routes.SETTINGS) },
                 onStatisticsClicked = { navController.navigate(Routes.STATISTICS) },
                 onAchievementsClicked = { navController.navigate(Routes.ACHIEVEMENTS) },
-                onPrayerTimesClicked = { navController.navigate(Routes.PRAYER_TIMES) }
+                onPrayerTimesClicked = { navController.navigate(Routes.PRAYER_TIMES) },
+                onInspirationClicked = { navController.navigate(Routes.INSPIRATION) }
             )
         }
 
@@ -119,6 +121,10 @@ fun QazaNavHost(modifier: Modifier = Modifier, appViewModel: AppViewModel = hilt
 
         composable(Routes.PRAYER_TIMES) {
             PrayerTimesScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable(Routes.INSPIRATION) {
+            DailyInspirationScreen(onBack = { navController.popBackStack() })
         }
 
         composable(Routes.ACHIEVEMENTS) {

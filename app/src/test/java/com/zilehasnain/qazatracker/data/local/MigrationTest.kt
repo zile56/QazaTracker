@@ -75,7 +75,7 @@ class MigrationTest {
 
     private fun openMigrated(): QazaDatabase =
         Room.databaseBuilder(context, QazaDatabase::class.java, dbName)
-            .addMigrations(MIGRATION_1_2)
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
             .allowMainThreadQueries()
             .build()
 
@@ -114,6 +114,23 @@ class MigrationTest {
             val stored = db.milestoneDao().getMilestones().first().single()
             assertEquals(PrayerType.FAJR, stored.prayerType)
             assertEquals(achievedAt, stored.achievedAt)
+        } finally {
+            db.close()
+        }
+    }
+
+    @Test
+    fun `migrating 1 to 3 adds the bookmark table and still keeps prayer data`() = runTest {
+        val db = openMigrated()
+        try {
+            assertTrue(db.inspirationDao().observeBookmarks().first().isEmpty())
+
+            db.inspirationDao().insert(
+                com.zilehasnain.qazatracker.data.local.entity.InspirationBookmarkEntity("q2:153", Instant.parse("2026-03-10T05:00:00Z"))
+            )
+
+            assertEquals(listOf("q2:153"), db.inspirationDao().observeBookmarks().first().map { it.itemId })
+            assertEquals(94, db.prayerLedgerDao().observeRemainingCount(PrayerType.FAJR).first()?.remaining)
         } finally {
             db.close()
         }

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -70,7 +71,8 @@ fun DashboardScreen(
     onSettingsClicked: () -> Unit = {},
     onStatisticsClicked: () -> Unit = {},
     onAchievementsClicked: () -> Unit = {},
-    onPrayerTimesClicked: () -> Unit = {}
+    onPrayerTimesClicked: () -> Unit = {},
+    onInspirationClicked: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     DashboardContent(
@@ -82,6 +84,7 @@ fun DashboardScreen(
         onStatisticsClicked = onStatisticsClicked,
         onAchievementsClicked = onAchievementsClicked,
         onPrayerTimesClicked = onPrayerTimesClicked,
+        onInspirationClicked = onInspirationClicked,
         onAdjustClicked = viewModel::onAdjustClicked,
         onAdjustmentSignChanged = viewModel::onAdjustmentSignChanged,
         onAdjustmentMagnitudeChanged = viewModel::onAdjustmentMagnitudeChanged,
@@ -106,6 +109,7 @@ fun DashboardContent(
     onStatisticsClicked: () -> Unit = {},
     onAchievementsClicked: () -> Unit = {},
     onPrayerTimesClicked: () -> Unit = {},
+    onInspirationClicked: () -> Unit = {},
     onAdjustClicked: (PrayerType) -> Unit = {},
     onAdjustmentSignChanged: (Boolean) -> Unit = {},
     onAdjustmentMagnitudeChanged: (String) -> Unit = {},
@@ -187,7 +191,11 @@ fun DashboardContent(
                 }
             }
 
-            Spacer(Modifier.height(18.dp))
+            Spacer(Modifier.height(10.dp))
+            TextButton(onClick = onInspirationClicked, contentPadding = PaddingValues(0.dp)) {
+                Text("📖  Daily inspiration", style = MaterialTheme.typography.labelLarge)
+            }
+            Spacer(Modifier.height(8.dp))
 
             if (uiState.celebrations.isNotEmpty()) {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {

@@ -2,10 +2,12 @@ package com.zilehasnain.qazatracker.di
 
 import com.zilehasnain.qazatracker.data.location.AndroidLocationProvider
 import com.zilehasnain.qazatracker.data.repository.DataExportRepositoryImpl
+import com.zilehasnain.qazatracker.data.repository.InspirationRepositoryImpl
 import com.zilehasnain.qazatracker.data.repository.PrayerTimesSettingsRepositoryImpl
 import com.zilehasnain.qazatracker.data.repository.QazaRepositoryImpl
 import com.zilehasnain.qazatracker.data.repository.SettingsRepositoryImpl
 import com.zilehasnain.qazatracker.domain.repository.DataExportRepository
+import com.zilehasnain.qazatracker.domain.repository.InspirationRepository
 import com.zilehasnain.qazatracker.domain.repository.LocationProvider
 import com.zilehasnain.qazatracker.domain.repository.NotificationScheduler
 import com.zilehasnain.qazatracker.domain.repository.PrayerTimesSettingsRepository
@@ -47,4 +49,8 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindLocationProvider(impl: AndroidLocationProvider): LocationProvider
+
+    @Binds
+    @Singleton
+    abstract fun bindInspirationRepository(impl: InspirationRepositoryImpl): InspirationRepository
 }
