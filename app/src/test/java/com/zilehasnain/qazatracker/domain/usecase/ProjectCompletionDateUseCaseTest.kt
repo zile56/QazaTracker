@@ -61,8 +61,18 @@ class ProjectCompletionDateUseCaseTest {
     }
 
     @Test
-    fun `tracking that began today is not enough data, even with completions`() {
-        assertEquals(CompletionProjection.InsufficientData, project(100, logged(0, 20), startedDaysAgo = 0))
+    fun `tracking that began today still gives an estimate, counting the first day as one`() {
+        val estimate = estimateOf(project(100, logged(0, 20), startedDaysAgo = 0))
+
+        assertEquals(1, estimate.daysTracked)
+        assertEquals(20f, estimate.averagePrayersPerDay, 0.001f)
+        assertEquals(5, estimate.daysRemaining)
+        assertEquals(EstimateConfidence.LOW, estimate.confidence)
+    }
+
+    @Test
+    fun `tracking that began today with nothing logged is still not enough data`() {
+        assertEquals(CompletionProjection.InsufficientData, project(100, emptyList(), startedDaysAgo = 0))
     }
 
     // ---- The estimate itself ----

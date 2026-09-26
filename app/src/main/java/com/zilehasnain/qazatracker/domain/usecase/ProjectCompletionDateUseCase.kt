@@ -28,9 +28,10 @@ class ProjectCompletionDateUseCase @Inject constructor() {
     ): CompletionProjection {
         if (totalRemaining <= 0) return CompletionProjection.AlreadyCaughtUp
 
-        val daysTracked = ChronoUnit.DAYS.between(trackingStartedAt, today)
+        // The first day counts as a day: tracking that began today has one day of pace, not zero.
+        val daysTracked = ChronoUnit.DAYS.between(trackingStartedAt, today).coerceAtLeast(1)
         val totalCompleted = completions.size
-        if (daysTracked <= 0 || totalCompleted <= 0) return CompletionProjection.InsufficientData
+        if (totalCompleted <= 0) return CompletionProjection.InsufficientData
 
         val pacePerDay = totalCompleted.toDouble() / daysTracked
         // A vanishingly small pace can't be allowed to overflow an Int.
